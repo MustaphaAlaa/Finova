@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Modules\SendMoney.Module\Application\SendMoney.Application.csproj" />
+    <ProjectReference Include="..\..\Modules\Banks.Module\Application\Banks.Application.csproj" />
+    <ProjectReference Include="..\..\Modules\ReceiveMoney.Module\Application\ReceiveMoney.Application.csproj" />
+    <ProjectReference Include="..\..\Modules\Identity.Module\Application\Identity.Application.csproj" />
+  </ItemGroup>
+
+</Project>
