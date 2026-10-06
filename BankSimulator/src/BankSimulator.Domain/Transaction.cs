@@ -1,4 +1,6 @@
-﻿namespace BankSimulator.Domain;
+﻿using System.Runtime.CompilerServices;
+
+namespace BankSimulator.Domain;
 
 public class Transaction
 {
@@ -9,4 +11,5 @@ public class Transaction
     public decimal Amount { get; set; }
     public string Reference { get; set; } = string.Empty;
     public DateTime Date { get; set; }
+    public List<TransactionMetadata> TransactionMetadata { get; set; }
 }
