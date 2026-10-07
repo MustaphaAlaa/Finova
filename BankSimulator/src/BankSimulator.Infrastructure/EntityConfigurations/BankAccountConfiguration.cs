@@ -26,12 +26,10 @@ public class BankAccountConfiguration : IEntityTypeConfiguration<BankAccount>
 
     private List<BankAccount> BankAccountData()
     {
-        {
-            string filePath = "BankSimulator/src/BankSimulator.Infrastructure/BankAccounts.json";
+        string filePath = Path.Combine(AppContext.BaseDirectory, "BankAccounts.json");
 
-            using FileStream openStream = File.OpenRead(filePath);
-            var accounts = JsonSerializer.Deserialize<List<BankAccount>>(openStream);
-            return accounts ?? new List<BankAccount>();
-        }
+        using FileStream openStream = File.OpenRead(filePath);
+        var accounts = JsonSerializer.Deserialize<List<BankAccount>>(openStream);
+        return accounts ?? new List<BankAccount>();
     }
 }

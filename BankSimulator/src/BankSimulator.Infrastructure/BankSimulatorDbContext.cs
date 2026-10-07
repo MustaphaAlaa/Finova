@@ -8,7 +8,7 @@ public class BankSimulatorDbContext : DbContext
     public DbSet<Client> Clients => Set<Client>();
     public DbSet<BankAccount> BankAccounts => Set<BankAccount>();
     public DbSet<Bank> Banks => Set<Bank>();
-    public DbSet<TransactionWebhookSubscription> WebhookSubscriptions => Set<TransactionWebhookSubscription>();
+    public DbSet<TransactionWebhookSubscription> TransactionWebhookSubscriptions => Set<TransactionWebhookSubscription>();
     public DbSet<Transaction> Transactions => Set<Transaction>();
     public DbSet<TransactionMetadata> TransactionsMetadata => Set<TransactionMetadata>();
 

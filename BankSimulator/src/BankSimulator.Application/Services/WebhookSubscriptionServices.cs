@@ -37,15 +37,14 @@ public class WebhookSubscriptionServices(
 
             logger.LogInformation($"Webhook for client is created successfully");
             return Result<string>.Success(
-                $"Webhook for client is created successfully",
-                HttpStatusCode.Created
+                $"Webhook for client is created successfully" 
             );
         }
         catch (Exception ex)
         {
             logger.LogError($"Unexpected Exception, {ex.Message}");
 
-            return Result<string>.Failure(ex.Message, HttpStatusCode.InternalServerError);
+            return Result<string>.Failure(ex.Message );
         }
     }
 }

@@ -22,12 +22,12 @@ public class ClientConfiguration : IEntityTypeConfiguration<Client>
 
         var clients = this.ClientsData();
         if (clients.Count > 0)
-            builder.HasData(this.ClientsData());
+            builder.HasData(clients);
     }
 
     private IList<Client> ClientsData()
     {
-        string filePath = "BankSimulator/src/BankSimulator.Infrastructure/Clients.json";
+        string filePath = Path.Combine(AppContext.BaseDirectory, "Clients.json");
 
         using FileStream openStream = File.OpenRead(filePath);
         var clients = JsonSerializer.Deserialize<List<Client>>(openStream);
