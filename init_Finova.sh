@@ -1,13 +1,19 @@
-mkdir Wallet
+if [ ! -d "Wallet" ]; then
+	mkdir Wallet
+fi
 cd ./Wallet
 
 dotnet tool install --global dotnet-ef
-dotnet new sln -n Finova
 
-mkdir ./Host ./Modules
-dotnet new webapi -n Finova.API -o ./Host/Finova.API
+if [ ! -f "Finova.sln" ]; then
+	dotnet new sln -n Finova
+fi
 
-dotnet sln add ./Host/Finova.API
+if [ ! -d "./Host/Finova.API" ]; then
+	mkdir ./Host ./Modules
+	dotnet new webapi -n Finova.API -o ./Host/Finova.API
+	dotnet sln add ./Host/Finova.API
+fi
 
 
 add_efcore_packages(){
@@ -28,6 +34,9 @@ add_projects_references(){
 		
 		# Application -> Domain
 		dotnet add "$module/Application/$projName.Application.csproj" reference "$module/Domain/$projName.Domain.csproj"
+		
+		# Application -> Contracts
+		dotnet add "$module/Application/$projName.Application.csproj" reference "$module/Contracts/$projName.Contracts.csproj"
 
 		# Infrastructure -> Application
 		dotnet add "$module/Infrastructure/$projName.Infrastructure.csproj" reference "$module/Application/$projName.Application.csproj"
@@ -43,7 +52,7 @@ create_module() {
     local projName=$1
     local module=$2
 
-		for layer in Domain Application Infrastructure Presentation
+		for layer in Domain Application Infrastructure Presentation Contracts
 		do
 			if [ ! -d "$module/$layer" ]; then
 				
@@ -69,9 +78,3 @@ create_module SendMoney 		./Modules/SendMoney.Module/
 create_module Banks    			./Modules/Banks.Module/    
 create_module ReceiveMoney      ./Modules/ReceiveMoney.Module/
 create_module Identity   	    ./Modules/Identity.Module/
-
-
-
-
-
-

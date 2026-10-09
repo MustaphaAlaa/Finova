@@ -2,6 +2,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Domain\Banks.Domain.csproj" />
+    <ProjectReference Include="..\Contracts\Banks.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.12" />
   </ItemGroup>
 
   <PropertyGroup>
