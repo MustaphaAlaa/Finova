@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\Application\ReceiveMoney.Application.csproj" />
-    <ProjectReference Include="..\Infrastructure\ReceiveMoney.Infrastructure.csproj" />
+    <ProjectReference Include="..\Domain\Transaction.Domain.csproj" />
+    <ProjectReference Include="..\Contracts\Transaction.Contracts.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
