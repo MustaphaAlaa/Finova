@@ -8,13 +8,27 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.12">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Modules\SendMoney.Module\Application\SendMoney.Application.csproj" />
+    <ProjectReference Include="../../Shared/Shared.csproj" />
     <ProjectReference Include="..\..\Modules\Banks.Module\Application\Banks.Application.csproj" />
-    <ProjectReference Include="..\..\Modules\ReceiveMoney.Module\Application\ReceiveMoney.Application.csproj" />
     <ProjectReference Include="..\..\Modules\Identity.Module\Application\Identity.Application.csproj" />
+    <ProjectReference Include="..\..\Modules\Transaction.Module\Application\Transaction.Application.csproj" />
+    <ProjectReference Include="..\..\Modules\Banks.Module\Infrastructure\Banks.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Identity.Module\Infrastructure\Identity.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Transaction.Module\Infrastructure\Transaction.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Banks.Module\Presentation\Banks.Presentation.csproj" />
+    <ProjectReference Include="..\..\Modules\Identity.Module\Presentation\Identity.Presentation.csproj" />
+    <ProjectReference Include="..\..\Modules\Transaction.Module\Presentation\Transaction.Presentation.csproj" />
   </ItemGroup>
 
 </Project>

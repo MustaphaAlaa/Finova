@@ -1,6 +1,9 @@
-@Finova.API_HostAddress = http://localhost:5074
+@Finova_API_HostAddress = http://localhost:5074
 
-GET {{Finova.API_HostAddress}}/weatherforecast/
+GET {{Finova_API_HostAddress}}/api/banks
+X-Webhook-Signature: x9g64UKRBTS3B9gCw4doj
+X-Webhook-Timestamp: 1791705019
+
 Accept: application/json
 
 ###
