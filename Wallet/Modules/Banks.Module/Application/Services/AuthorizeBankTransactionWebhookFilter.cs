@@ -1,21 +1,30 @@
+using System.Diagnostics;
+using System.Net;
+using System.Security.Cryptography;
+using System.Text;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace Finova.Modules.Banks.Application.Services;
 
-public sealed class AuthorizeBankTransactionWebhookFilter(BankTransactionWebhookServices validReq)
-    : IAsyncActionFilter
+public sealed class AuthorizeBankTransactionWebhookFilter(
+    BankWebhooksServices webhookFilterServices,
+    ILogger<AuthorizeBankTransactionWebhookFilter> logger
+) : IAsyncAuthorizationFilter
 {
-    private const string WebhookSignatureHeader = "X-Webhook-Signature";
-
-    public async Task OnActionExecutionAsync(
-        ActionExecutingContext context,
-        ActionExecutionDelegate next
-    )
+    public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
     {
-        var authorized = await validReq.AuthorizeWebhook(context, WebhookSignatureHeader);
-        if (!authorized)
-            return;
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
+        await webhookFilterServices.OnAuthorizationAsync(context);
+        stopwatch.Stop();
 
-        await next();
+        double executionTime = stopwatch.ElapsedMilliseconds / 1000;
+
+        logger.LogInformation(
+            $"The {string.Join(", ", context.ActionDescriptor.FilterDescriptors)} take {executionTime} sec to execute"
+        );
     }
 }

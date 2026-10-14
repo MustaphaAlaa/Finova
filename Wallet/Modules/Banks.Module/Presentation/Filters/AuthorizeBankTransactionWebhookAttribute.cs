@@ -1,6 +1,5 @@
 using Finova.Modules.Banks.Application.Services;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -13,8 +12,12 @@ public sealed class AuthorizeBankTransactionWebhookAttribute : Attribute, IFilte
 
     public IFilterMetadata CreateInstance(IServiceProvider serviceProvider)
     {
-        var validReq = serviceProvider.GetRequiredService<BankTransactionWebhookServices>();
+        var validateWebhookServices =
+            serviceProvider.GetRequiredService<BankWebhooksServices>();
+        var logger = serviceProvider.GetRequiredService<
+            ILogger<AuthorizeBankTransactionWebhookFilter>
+        >();
 
-        return new AuthorizeBankTransactionWebhookFilter(validReq);
+        return new AuthorizeBankTransactionWebhookFilter(validateWebhookServices, logger);
     }
 }

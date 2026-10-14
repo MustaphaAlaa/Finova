@@ -9,7 +9,10 @@ public static class BanksExtensions
 {
     public static void AddBanksExtensions(this IServiceCollection services, string connectionString)
     {
-        services.AddScoped<BankTransactionWebhookServices>();
+        services.AddScoped<BankWebhooksServices>();
+        services.AddScoped<WebhookHeaderSettings>();
+        services.AddScoped<BankTransactionWebhookValidationServices>(); 
+
         services.AddBanksInfrastructure(connectionString);
     }
 }
