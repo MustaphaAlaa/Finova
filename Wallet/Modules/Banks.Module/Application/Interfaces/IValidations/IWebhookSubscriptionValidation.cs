@@ -1,4 +1,4 @@
-namespace Finova.Modules.Banks.Application;
+namespace Finova.Modules.Banks.Application.Interfaces;
 
 public interface IWebhookSubscriptionValidation
 {

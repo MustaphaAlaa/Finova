@@ -1,5 +1,7 @@
 using System.Globalization;
 using System.Net;
+using Finova.Modules.Banks.Application.Interfaces;
+using Finova.Modules.Banks.Builders;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -8,25 +10,23 @@ using Shared.Services.Interfaces;
 
 namespace Finova.Modules.Banks.Application.Services;
 
-public sealed class BankTransactionWebhookValidationServices(
+internal sealed class BankTransactionWebhookValidationServices(
     WebhookHeaderSettings webhookSettings,
     IRequestUtilities requestUtilities,
     ILogger<BankWebhooksServices> logger
-)
+) : IBankTransactionWebhookValidationServices
 {
-    private byte[] _receivedSignatureBytes;
-    private byte[] _receivedTimestampBytes;
     private string _routeParameter;
 
-    public bool ValidateRequestHeaders(
-        AuthorizationFilterContext context,
-        out byte[] receivedSignatureBytes,
-        out byte[] receivedTimestampBytes
-    )
-    {
-        receivedSignatureBytes = new byte[] { };
-        receivedTimestampBytes = new byte[] { };
+    private WebhookHeadersBuilder _webhookHeadersBuilder = new();
 
+    public WebhookHeaders GetWebhookHeadersBytes()
+    {
+        return _webhookHeadersBuilder.Build();
+    }
+
+    public bool ValidateRequestHeaders(AuthorizationFilterContext context)
+    {
         var headers = context.HttpContext.Request.Headers;
 
         _routeParameter = requestUtilities.GetRouteParameterValue(context, "bankCode");
@@ -37,13 +37,12 @@ public sealed class BankTransactionWebhookValidationServices(
             return false;
 
         bool validateTimestampHeader = TryValidateTimestampHeader(context, headers);
-        receivedTimestampBytes = null;
 
         if (!validateTimestampHeader)
             return false;
 
-        receivedSignatureBytes = _receivedSignatureBytes;
-        receivedTimestampBytes = _receivedTimestampBytes;
+        if (!TryGetSecretKeyBytes(context))
+            return false;
 
         return true;
     }
@@ -53,10 +52,6 @@ public sealed class BankTransactionWebhookValidationServices(
         IHeaderDictionary headers
     )
     {
-        // api/bank-webhook/co/trans
-        // var requestPath = context.HttpContext.Request.Path.ToString().Split('/');
-        // var bnkUrl = requestPath[3];
-
         var signatureHeader = webhookSettings.GetSignatureHeader(_routeParameter);
 
         if (
@@ -84,8 +79,7 @@ public sealed class BankTransactionWebhookValidationServices(
             };
             return false;
         }
-
-        _receivedSignatureBytes = receivedSignatureBytes;
+        _webhookHeadersBuilder.AddSignatureBytes(receivedSignatureBytes);
         return true;
     }
 
@@ -96,19 +90,6 @@ public sealed class BankTransactionWebhookValidationServices(
     {
         try
         {
-            // var requestPath = context.HttpContext.Request.Path.ToString().Split('/');
-            // var bnkUrl = requestPath[3];
-
-            // if (
-            //     !context.RouteData.Values.TryGetValue("bankCode", out var routeValue)
-            //     || routeValue is not string bankCode
-            //     || string.IsNullOrWhiteSpace(bankCode)
-            // )
-            // {
-            //     context.Result = new BadRequestObjectResult("Missing or invalid bank code.");
-            //     return false;
-            // }
-
             var timestampKey = webhookSettings.GetTimestampHeader((string)_routeParameter);
 
             if (
@@ -153,12 +134,36 @@ public sealed class BankTransactionWebhookValidationServices(
                 }
             }
 
-            _receivedTimestampBytes = webhookSettings.Encode(timestampHeaderValue!);
+            _webhookHeadersBuilder.AddTimestampBytes(webhookSettings.Encode(timestampHeaderValue!));
+
             return true;
         }
         catch
         {
             throw;
         }
+    }
+
+    private bool TryGetSecretKeyBytes(AuthorizationFilterContext context)
+    {
+        try
+        {
+            var secretKey = webhookSettings.GetWebhookSecretKey((string)_routeParameter);
+            var secretKeyBytes = webhookSettings.Encode(secretKey);
+
+            _webhookHeadersBuilder.AddSecretKeyBytes(secretKeyBytes);
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError($"Webhook's BankSecret key is empty or null, {ex.Message}", ex);
+
+            context.Result = new ObjectResult("Internal server error we're working on it")
+            {
+                StatusCode = (int)HttpStatusCode.InternalServerError,
+            };
+        }
+        return false;
     }
 }

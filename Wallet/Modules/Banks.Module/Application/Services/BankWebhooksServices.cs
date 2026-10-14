@@ -2,46 +2,48 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Net;
 using System.Security.Cryptography;
+using Finova.Modules.Banks.Application.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Finova.Modules.Banks.Application.Services;
 
-public sealed class BankWebhooksServices(
+internal sealed class BankWebhooksServices(
     WebhookHeaderSettings WebhookSettings,
-    BankTransactionWebhookValidationServices webhookValidationServices,
-    ILogger<BankWebhooksServices> logger,
-    IConfiguration configuration
-)
+    IBankTransactionWebhookValidationServices webhookValidationServices,
+    ILogger<BankWebhooksServices> logger
+) : IBankWebhooksServices
 {
-    private readonly string SecretKey = configuration["Webhooks:BankSecret"];
-    private Byte[] _secretKeyBytes;
-    private byte[] _receivedSignatureBytes;
-    private byte[] _receivedTimestampBytes;
+    WebhookHeaders _webhookHeaders;
 
     public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
     {
-        if (
-            !webhookValidationServices.ValidateRequestHeaders(
-                context,
-                out byte[] receivedSignatureBytes,
-                out byte[] receivedTimestampBytes
-            )
-        )
-            return;
+        var requestId = context.HttpContext.TraceIdentifier;
 
-        _receivedSignatureBytes = receivedSignatureBytes;
-        _receivedTimestampBytes = receivedTimestampBytes;
+        logger.LogDebug("Starting bank webhook authorization. RequestId: {RequestId}", requestId);
 
-        if (!TryGetSecretKeyBytes(context))
+        if (!webhookValidationServices.ValidateRequestHeaders(context))
+        {
+            logger.LogWarning(
+                "Bank webhook authorization rejected because the required "
+                    + "headers are invalid or missing. RequestId: {RequestId}",
+                requestId
+            );
             return;
+        }
+
+        _webhookHeaders = webhookValidationServices.GetWebhookHeadersBytes();
 
         var isAuthorized = await AuthorizeWebhook(context);
         if (!isAuthorized)
         {
+            logger.LogWarning(
+                "Bank webhook authorization failed due to an invalid "
+                    + "signature. RequestId: {RequestId}",
+                requestId
+            );
             context.Result = new UnauthorizedObjectResult(
                 new ProblemDetails
                 {
@@ -51,6 +53,7 @@ public sealed class BankWebhooksServices(
                 }
             );
         }
+        logger.LogDebug("Bank webhook authorization succeeded. RequestId: {RequestId}", requestId);
     }
 
     private async Task<bool> AuthorizeWebhook(AuthorizationFilterContext context)
@@ -60,49 +63,45 @@ public sealed class BankWebhooksServices(
         if (request.Body.CanSeek)
         {
             request.Body.Position = 0;
-        } 
-        
-        using var hmac = IncrementalHash.CreateHMAC(HashAlgorithmName.SHA256, _secretKeyBytes);
-
-        hmac.AppendData(_receivedTimestampBytes);
-        hmac.AppendData(WebhookSettings.Encode("."));
-
-        var buffer = new byte[81920];
-        int bytesRead;
-        while ((bytesRead = await request.Body.ReadAsync(buffer)) > 0)
-        {
-            hmac.AppendData(buffer, 0, bytesRead);
         }
-        if (request.Body.CanSeek)
+        try
         {
-            request.Body.Position = 0;
-        }
-        byte[] expectedSignature = hmac.GetHashAndReset();
+            using var hmac = IncrementalHash.CreateHMAC(
+                HashAlgorithmName.SHA256,
+                _webhookHeaders.SecretKeyBytes
+            );
 
-        var isSignaturesMatch = CryptographicOperations.FixedTimeEquals(
-            expectedSignature,
-            _receivedSignatureBytes
-        );
+            hmac.AppendData(_webhookHeaders.TimestampBytes);
+            hmac.AppendData(WebhookSettings.Encode("."));
 
-        if (isSignaturesMatch)
-            return true;
-
-        return false;
-    }
-
-    public bool TryGetSecretKeyBytes(AuthorizationFilterContext context)
-    {
-        if (string.IsNullOrEmpty(SecretKey))
-        {
-            logger.LogError("Webhook's BankSecret key is empty or null");
-
-            context.Result = new ObjectResult("Internal server error we're working on it")
+            var buffer = new byte[81920];
+            int bytesRead;
+            while ((bytesRead = await request.Body.ReadAsync(buffer)) > 0)
             {
-                StatusCode = (int)HttpStatusCode.InternalServerError,
-            };
-            throw new KeyNotFoundException("Bank secret Key not found");
+                hmac.AppendData(buffer, 0, bytesRead);
+            }
+            if (request.Body.CanSeek)
+            {
+                request.Body.Position = 0;
+            }
+            byte[] expectedSignature = hmac.GetHashAndReset();
+
+            var isSignaturesMatch = CryptographicOperations.FixedTimeEquals(
+                expectedSignature,
+                _webhookHeaders.SignatureBytes
+            );
+
+            if (isSignaturesMatch)
+                return true;
+
+            return false;
         }
-        _secretKeyBytes = WebhookSettings.Encode(SecretKey);
-        return true;
+        finally
+        {
+            if (request.Body.CanSeek)
+            {
+                request.Body.Position = 0;
+            }
+        }
     }
 }

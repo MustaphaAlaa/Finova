@@ -1,30 +1,29 @@
 using System.Diagnostics;
-using System.Net;
-using System.Security.Cryptography;
-using System.Text;
-using Microsoft.AspNetCore.Http;
+using Finova.Modules.Banks.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Finova.Modules.Banks.Application.Services;
 
-public sealed class AuthorizeBankTransactionWebhookFilter(
-    BankWebhooksServices webhookFilterServices,
+internal sealed class AuthorizeBankTransactionWebhookFilter(
+    IBankWebhooksServices webhookFilterServices,
     ILogger<AuthorizeBankTransactionWebhookFilter> logger
-) : IAsyncAuthorizationFilter
+) : IAuthorizeBankTransactionWebhookFilter
 {
     public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
+
         await webhookFilterServices.OnAuthorizationAsync(context);
         stopwatch.Stop();
 
-        double executionTime = stopwatch.ElapsedMilliseconds / 1000;
-
+ 
         logger.LogInformation(
-            $"The {string.Join(", ", context.ActionDescriptor.FilterDescriptors)} take {executionTime} sec to execute"
+            "Webhook authorization filter completed. "
+                + "ElapsedMs: {ElapsedMs}, RequestId: {RequestId}",
+            stopwatch.ElapsedMilliseconds,
+            context.HttpContext.TraceIdentifier
         );
     }
 }

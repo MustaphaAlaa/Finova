@@ -24,6 +24,16 @@ public class WebhookHeaderSettings(IConfiguration configuration)
         return signature;
     }
 
+    public string GetWebhookSecretKey(string bankCode)
+    {
+        var signature = configuration[$"WebhooksHeaders:{bankCode}:SecretKey"];
+        if (signature is null)
+        {
+            throw new InvalidOperationException($"Missing the secret for '{bankCode}'s webhook'.");
+        }
+        return signature;
+    }
+
     public string GetTimestampHeader(string bankCode)
     {
         return configuration[$"WebhooksHeaders:{bankCode}:Timestamp"]
