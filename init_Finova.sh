@@ -25,12 +25,13 @@ add_efcore_packages(){
 		touch "$module/$projName".DbContext.cs
 }
 
+
 add_projects_references(){
 	    local projName=$1
     	local module=$2
 
-		#Web API -> Application
-		dotnet add  "./Host/Finova.API/Finova.API.csproj" reference "$module/Application/$projName.Application.csproj"
+		#Web API -> Presentation
+		dotnet add  "./Host/Finova.API/Finova.API.csproj" reference "$module/Presentation/$projName.Presentation.csproj"
 		
 		# Application -> Domain
 		dotnet add "$module/Application/$projName.Application.csproj" reference "$module/Domain/$projName.Domain.csproj"
@@ -73,8 +74,7 @@ create_module() {
 		add_projects_references $projName $module
 }
 
-
-create_module SendMoney 		./Modules/SendMoney.Module/   		
-create_module Banks    			./Modules/Banks.Module/    
-create_module ReceiveMoney      ./Modules/ReceiveMoney.Module/
+ 	
 create_module Identity   	    ./Modules/Identity.Module/
+create_module Banks    			./Modules/Banks.Module/    
+create_module Transaction      ./Modules/Transaction.Module/
