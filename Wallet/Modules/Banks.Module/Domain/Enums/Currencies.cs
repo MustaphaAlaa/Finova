@@ -1,4 +1,4 @@
-namespace Finova.Modules.Banks.Domain.Entities;
+namespace Banks.Domain.Entities;
 
 public enum Currencies
 {

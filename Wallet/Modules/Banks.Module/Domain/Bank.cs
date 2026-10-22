@@ -1,13 +1,11 @@
-namespace Finova.Modules.Banks.Domain.Entities;
+namespace Banks.Domain.Entities;
 
 public class Bank
 {
     public Guid Id { get; set; }
-    public string Name { get; set; } = string.Empty;
+    public ContractedBanks Name { get; set; }
     public bool Contracted { get; set; }
     public List<BankAccount> BankAccounts { get; set; }
-    public string TransactionSeparator { get; set; } = string.Empty;
-    public string WebhookSecret { get; set; } = string.Empty;
 }
 
 

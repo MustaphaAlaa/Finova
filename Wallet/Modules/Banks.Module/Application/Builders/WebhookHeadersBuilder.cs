@@ -1,6 +1,6 @@
-using Finova.Modules.Banks.Application;
+using Banks.Application;
 
-namespace Finova.Modules.Banks.Builders;
+namespace Banks.Builders;
 
 internal class WebhookHeadersBuilder
 {

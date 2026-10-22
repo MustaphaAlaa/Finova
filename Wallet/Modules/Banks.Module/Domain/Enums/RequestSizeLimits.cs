@@ -1,6 +1,6 @@
-namespace Finova.Modules.Banks.Domain.Entities;
+namespace Banks.Domain.Enums;
 
 public enum RequestSizeLimits
 {
-    TransactionWebhook = 2 * 1024 * 1024,
+    TransactionWebhook = 3 * 1024 * 1024,
 }
