@@ -1,24 +1,35 @@
 using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore;
 
 namespace Finova.Shared.Infrastructure.Interfaces;
 
 public interface IBaseRepository<TEntity>
     where TEntity : class
 {
-    Task<TEntity> CreateAsync(TEntity entity);
-    Task DeleteAsync(Expression<Func<TEntity, bool>> predicate);
-    Task<List<TEntity>> RetrieveAllAsync();
-    Task<IEnumerable<TEntity>> RetrieveAllAsync(Expression<Func<TEntity, bool>> predicate);
-    Task<TEntity?> RetrieveAsync(Expression<Func<TEntity, bool>> predicate);
+    Task<TEntity> CreateAsync(TEntity entity, CancellationToken ct = default);
+
+    Task DeleteAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken ct = default);
+    Task<List<TEntity>> RetrieveAllAsync(CancellationToken ct = default);
+    Task<IEnumerable<TEntity>> RetrieveAllAsync(
+        Expression<Func<TEntity, bool>> predicate,
+        CancellationToken ct = default
+    );
+    Task<TEntity?> RetrieveAsync(
+        Expression<Func<TEntity, bool>> predicate,
+        CancellationToken ct = default
+    );
 
     Task<TEntity?> RetrieveWithIncludeAsync(
         Expression<Func<TEntity, bool>> predicate,
-        Expression<Func<TEntity, object>> includePredicate
+        Expression<Func<TEntity, object>> includePredicate,
+        CancellationToken ct = default
     );
+
     TEntity Update(TEntity entity);
 
-    Task<TEntity?> RetrieveTrackedAsync(Expression<Func<TEntity, bool>> predicate);
+    Task<TEntity?> RetrieveTrackedAsync(
+        Expression<Func<TEntity, bool>> predicate,
+        CancellationToken ct = default
+    );
 
-    Task<List<TEntity>> RetrieveAllTrackedAsync();
+    Task<List<TEntity>> RetrieveAllTrackedAsync(CancellationToken ct = default);
 }

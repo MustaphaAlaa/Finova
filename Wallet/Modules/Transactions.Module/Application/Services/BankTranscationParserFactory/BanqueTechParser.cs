@@ -7,8 +7,6 @@ public class BanqueTechParser : ITransactionStringParser
 {
     public BankTransaction Parse(string transactionString)
     {
-        System.Console.WriteLine("BanqueTech Parser");
-
         throw new NotImplementedException();
     }
 }

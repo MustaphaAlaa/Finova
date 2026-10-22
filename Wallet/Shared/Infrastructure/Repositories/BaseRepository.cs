@@ -1,28 +1,24 @@
 using System.Linq.Expressions;
 using Finova.Shared.Infrastructure.Interfaces;
-using Microsoft.EntityFrameworkCore; 
+using Microsoft.EntityFrameworkCore;
 
 namespace Shared.Infrastructure.Repositories;
 
-public class BaseRepository<TEntity, TDbContext> : IBaseRepository<TEntity>
+public class BaseRepository<TEntity, TDbContext>(TDbContext context) : IBaseRepository<TEntity>
     where TEntity : class
     where TDbContext : DbContext
 {
-    protected readonly TDbContext _db;
-
-    public BaseRepository(TDbContext context)
-    {
-        _db = context;
-    }
+    protected readonly TDbContext Db = context;
 
     /// <summary>
     /// Create an entity in the database.
     /// </summary>
     /// <param name="entity">the entity type to be creat.</param>
+    /// <param name="ct"> CancellationToken cancellationToken</param>
     /// <returns>the entity after created it.</returns>
-    public async Task<TEntity> CreateAsync(TEntity entity)
+    public async Task<TEntity> CreateAsync(TEntity entity, CancellationToken ct = default)
     {
-        await _db.Set<TEntity>().AddAsync(entity);
+        await Db.Set<TEntity>().AddAsync(entity, ct);
         return entity;
     }
 
@@ -30,60 +26,75 @@ public class BaseRepository<TEntity, TDbContext> : IBaseRepository<TEntity>
     /// Asynchronously deletes an entity from the database based on a predicate.
     /// </summary>
     /// <param name="predicate">The condition to find the entity to be deleted.</param>
+    /// <param name="ct"> CancellationToken cancellationToken</param>
     /// <returns>The number of state entries written to the database.</returns>
-    public async Task DeleteAsync(Expression<Func<TEntity, bool>> predicate)
+    public async Task DeleteAsync(
+        Expression<Func<TEntity, bool>> predicate,
+        CancellationToken ct = default
+    )
     {
-        var entity = await _db.Set<TEntity>().FirstOrDefaultAsync(predicate);
+        var entity = await Db.Set<TEntity>().FirstOrDefaultAsync(predicate, ct);
 
         if (entity == null)
             return;
 
-        _db.Set<TEntity>().Remove(entity);
+        Db.Set<TEntity>().Remove(entity);
     }
 
-    public async Task<TEntity?> RetrieveAsync(Expression<Func<TEntity, bool>> predicate)
+    public async Task<TEntity?> RetrieveAsync(
+        Expression<Func<TEntity, bool>> predicate,
+        CancellationToken ct = default
+    )
     {
-        return await _db.Set<TEntity>().AsNoTracking().FirstOrDefaultAsync(predicate);
+        return await Db.Set<TEntity>().AsNoTracking().FirstOrDefaultAsync(predicate, ct);
     }
 
     public async Task<TEntity?> RetrieveWithIncludeAsync(
         Expression<Func<TEntity, bool>> predicate,
-        Expression<Func<TEntity, object>> includePredicate
+        Expression<Func<TEntity, object>> includePredicate,
+        CancellationToken ct = default
     )
     {
-        return await _db.Set<TEntity>()
+        return await Db.Set<TEntity>()
             .AsNoTracking()
             .Include(includePredicate)
-            .FirstOrDefaultAsync(predicate);
+            .FirstOrDefaultAsync(predicate, ct);
     }
 
-    public Task<List<TEntity>> RetrieveAllAsync()
+    public async Task<List<TEntity>> RetrieveAllAsync(CancellationToken ct = default)
     {
-        return _db.Set<TEntity>().AsNoTracking().Select(entity => entity).ToListAsync();
+        var result = await Db.Set<TEntity>()
+            .AsNoTracking()
+            .Select(entity => entity)
+            .ToListAsync(ct);
+        return result;
     }
 
     public async Task<IEnumerable<TEntity>> RetrieveAllAsync(
-        Expression<Func<TEntity, bool>> predicate
-    ) // change the return type
+        Expression<Func<TEntity, bool>> predicate,
+        CancellationToken ct = default
+    )
     {
-        return await _db.Set<TEntity>().AsNoTracking().Where(predicate).ToListAsync();
+        return await Db.Set<TEntity>().AsNoTracking().Where(predicate).ToListAsync(ct);
     }
 
     public TEntity Update(TEntity entity)
     {
-        _db.Set<TEntity>().Update(entity);
+        Db.Set<TEntity>().Update(entity);
         return entity;
     }
 
     // Example of a retrieval method FOR UPDATE scenarios
-    public async Task<TEntity?> RetrieveTrackedAsync(Expression<Func<TEntity, bool>> predicate)
+    public async Task<TEntity?> RetrieveTrackedAsync(
+        Expression<Func<TEntity, bool>> predicate,
+        CancellationToken ct = default
+    )
     {
-        return await _db.Set<TEntity>().FirstOrDefaultAsync(predicate);
+        return await Db.Set<TEntity>().FirstOrDefaultAsync(predicate, ct);
     }
 
-    public async Task<List<TEntity>> RetrieveAllTrackedAsync()
+    public async Task<List<TEntity>> RetrieveAllTrackedAsync(CancellationToken ct = default)
     {
-        return await _db.Set<TEntity>().ToListAsync();
+        return await Db.Set<TEntity>().ToListAsync(ct);
     }
- 
 }
