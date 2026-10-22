@@ -1,9 +1,9 @@
-using Finova.Modules.Banks.Application.Services;
-using Finova.Modules.Banks.Infrastructure.Extensions;
-using Finova.Modules.Banks.Presentation.Filters;
+using Banks.Application.Extensions;
+using Banks.Application.Services;
+using Banks.Infrastructure.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Finova.Modules.Banks.Extensions;
+namespace Banks.Extensions;
 
 public static class BanksExtensions
 {

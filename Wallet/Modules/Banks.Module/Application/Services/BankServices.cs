@@ -4,6 +4,7 @@ using Banks.Application.Interfaces.IRepositories;
 using Banks.Application.Interfaces.IServices;
 using Banks.Application.Interfaces.IValidations;
 using Banks.Domain;
+using Banks.Domain.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace Banks.Application.Services;
