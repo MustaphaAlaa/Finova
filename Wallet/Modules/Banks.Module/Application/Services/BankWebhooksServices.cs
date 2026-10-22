@@ -1,17 +1,14 @@
-using System.Diagnostics;
-using System.Globalization;
-using System.Net;
 using System.Security.Cryptography;
-using Finova.Modules.Banks.Application.Interfaces;
+using Banks.Application.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
 
-namespace Finova.Modules.Banks.Application.Services;
+namespace Banks.Application.Services;
 
 internal sealed class BankWebhooksServices(
-    WebhookHeaderSettings WebhookSettings,
+    WebhookHeaderSettings webhookSettings,
     IBankTransactionWebhookValidationServices webhookValidationServices,
     ILogger<BankWebhooksServices> logger
 ) : IBankWebhooksServices
@@ -72,7 +69,7 @@ internal sealed class BankWebhooksServices(
             );
 
             hmac.AppendData(_webhookHeaders.TimestampBytes);
-            hmac.AppendData(WebhookSettings.Encode("."));
+            hmac.AppendData(webhookSettings.Encode("."));
 
             var buffer = new byte[81920];
             int bytesRead;
