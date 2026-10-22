@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../../../Shared/Shared.csproj" />
+    <ProjectReference Include="..\..\Transactions.Module\Contracts\Transactions.Contracts.csproj" />
     <ProjectReference Include="..\Domain\Banks.Domain.csproj" />
     <ProjectReference Include="..\Contracts\Banks.Contracts.csproj" />
   </ItemGroup>

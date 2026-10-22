@@ -77,4 +77,4 @@ create_module() {
  	
 create_module Identity   	    ./Modules/Identity.Module/
 create_module Banks    			./Modules/Banks.Module/    
-create_module Transaction      ./Modules/Transaction.Module/
+create_module Transactions      ./Modules/Transactions.Module/

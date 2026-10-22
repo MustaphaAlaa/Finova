@@ -22,13 +22,13 @@
     <ProjectReference Include="../../Shared/Shared.csproj" />
     <ProjectReference Include="..\..\Modules\Banks.Module\Application\Banks.Application.csproj" />
     <ProjectReference Include="..\..\Modules\Identity.Module\Application\Identity.Application.csproj" />
-    <ProjectReference Include="..\..\Modules\Transaction.Module\Application\Transaction.Application.csproj" />
+    <ProjectReference Include="..\..\Modules\Transactions.Module\Application\Transactions.Application.csproj" />
     <ProjectReference Include="..\..\Modules\Banks.Module\Infrastructure\Banks.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\Identity.Module\Infrastructure\Identity.Infrastructure.csproj" />
-    <ProjectReference Include="..\..\Modules\Transaction.Module\Infrastructure\Transaction.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Transactions.Module\Infrastructure\Transactions.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\Banks.Module\Presentation\Banks.Presentation.csproj" />
     <ProjectReference Include="..\..\Modules\Identity.Module\Presentation\Identity.Presentation.csproj" />
-    <ProjectReference Include="..\..\Modules\Transaction.Module\Presentation\Transaction.Presentation.csproj" />
+    <ProjectReference Include="..\..\Modules\Transactions.Module\Presentation\Transaction.Presentation.csproj" />
   </ItemGroup>
 
 </Project>

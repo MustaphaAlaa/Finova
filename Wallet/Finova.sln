@@ -37,19 +37,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Contracts", "Contracts", "{
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Identity.Contracts", "Modules\Identity.Module\Contracts\Identity.Contracts.csproj", "{1DA4FED2-BE68-41CE-B4AA-F4A01D78D5F6}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Transaction.Module", "Transaction.Module", "{7270E51F-A395-3B4B-05D2-15753CCDFC33}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Transactions.Module", "Transactions.Module", "{7270E51F-A395-3B4B-05D2-15753CCDFC33}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application", "{DBA7DCCB-F975-48E9-84FA-A8224A8DD71B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Transaction.Application", "Modules\Transaction.Module\Application\Transaction.Application.csproj", "{58E9F20C-2E8D-4DE3-9D68-1D854AD488F9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Transactions.Application", "Modules\Transactions.Module\Application\Transactions.Application.csproj", "{58E9F20C-2E8D-4DE3-9D68-1D854AD488F9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Domain", "Domain", "{8DA67059-FEBA-562B-B018-0B06D34DC696}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Transaction.Domain", "Modules\Transaction.Module\Domain\Transaction.Domain.csproj", "{1178E12C-C097-4E1E-89B8-CFE59FAF7B4C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Transactions.Domain", "Modules\Transactions.Module\Domain\Transactions.Domain.csproj", "{1178E12C-C097-4E1E-89B8-CFE59FAF7B4C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Contracts", "Contracts", "{B44F323C-936F-B07C-647B-C5BF3A97A57F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Transaction.Contracts", "Modules\Transaction.Module\Contracts\Transaction.Contracts.csproj", "{D766A12D-CDA0-4EDD-ACB4-D4CE8C2570EC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Transactions.Contracts", "Modules\Transactions.Module\Contracts\Transactions.Contracts.csproj", "{D766A12D-CDA0-4EDD-ACB4-D4CE8C2570EC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{67BAF522-EA79-C63C-1C30-589C9FF4495D}"
 EndProject
@@ -69,11 +69,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Identity.Presentation", "Mo
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{B31D77E1-0EDE-EFD6-F971-A3B02C42C31A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Transaction.Infrastructure", "Modules\Transaction.Module\Infrastructure\Transaction.Infrastructure.csproj", "{81BB04F7-4BCA-4A46-ADC8-91E8DAA712E2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Transactions.Infrastructure", "Modules\Transactions.Module\Infrastructure\Transactions.Infrastructure.csproj", "{81BB04F7-4BCA-4A46-ADC8-91E8DAA712E2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Presentation", "Presentation", "{E5123CC9-C2C5-347E-B109-818F97548B8A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Transaction.Presentation", "Modules\Transaction.Module\Presentation\Transaction.Presentation.csproj", "{42B5ADC1-6EC9-4D39-A8B1-F02E006BE161}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Transaction.Presentation", "Modules\Transactions.Module\Presentation\Transaction.Presentation.csproj", "{42B5ADC1-6EC9-4D39-A8B1-F02E006BE161}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared.csproj", "{779F40E4-E928-4CD2-B5F5-6770D54D4605}"
 EndProject
