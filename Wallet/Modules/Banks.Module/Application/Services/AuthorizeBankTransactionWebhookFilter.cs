@@ -1,9 +1,9 @@
 using System.Diagnostics;
-using Finova.Modules.Banks.Application.Interfaces;
+using Banks.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
 
-namespace Finova.Modules.Banks.Application.Services;
+namespace Banks.Application.Services;
 
 internal sealed class AuthorizeBankTransactionWebhookFilter(
     IBankWebhooksServices webhookFilterServices,

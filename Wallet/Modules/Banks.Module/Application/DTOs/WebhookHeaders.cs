@@ -1,15 +1,8 @@
-namespace Finova.Modules.Banks.Application;
+namespace Banks.Application;
 
-public class WebhookHeaders
+public class WebhookHeaders(byte[] signatureBytes, byte[] timestampBytes, byte[] secretKeyBytes)
 {
-    public byte[] SignatureBytes { get; set; }
-    public byte[] TimestampBytes { get; set; }
-    public byte[] SecretKeyBytes { get; set; }
-
-    public WebhookHeaders(byte[] signatureBytes, byte[] timestampBytes, byte[] secretKeyBytes)
-    {
-        this.SignatureBytes = signatureBytes;
-        this.TimestampBytes = timestampBytes;
-        this.SecretKeyBytes = secretKeyBytes;
-    }
+    public byte[] SignatureBytes { get; set; } = signatureBytes;
+    public byte[] TimestampBytes { get; set; } = timestampBytes;
+    public byte[] SecretKeyBytes { get; set; } = secretKeyBytes;
 }

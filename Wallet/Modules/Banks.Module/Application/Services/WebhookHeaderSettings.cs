@@ -1,7 +1,7 @@
 using System.Text;
 using Microsoft.Extensions.Configuration;
 
-namespace Finova.Modules.Banks.Application.Services;
+namespace Banks.Application.Services;
 
 public class WebhookHeaderSettings(IConfiguration configuration)
 {

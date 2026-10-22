@@ -1,14 +1,14 @@
 using System.Globalization;
 using System.Net;
-using Finova.Modules.Banks.Application.Interfaces;
-using Finova.Modules.Banks.Builders;
+using Banks.Application.Interfaces;
+using Banks.Builders;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
 using Shared.Services.Interfaces;
 
-namespace Finova.Modules.Banks.Application.Services;
+namespace Banks.Application.Services;
 
 internal sealed class BankTransactionWebhookValidationServices(
     WebhookHeaderSettings webhookSettings,
