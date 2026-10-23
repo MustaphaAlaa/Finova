@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using Banks.Application.Dtos;
 using Banks.Application.Interfaces.IRepositories;
 using Banks.Application.Interfaces.IValidations;
+using Banks.Contracts.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace Banks.Application.Services;

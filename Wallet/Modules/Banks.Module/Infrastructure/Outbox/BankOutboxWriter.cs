@@ -1,6 +1,6 @@
-using Banks.Application.Interfaces.IRepositories;
-using Banks.Domain;
-using Finova.Shared.Infrastructure.Interfaces;
+using Banks.Contracts.Entities;
+using Banks.Contracts.Enums;
+using Banks.Contracts.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shared.Infrastructure.Repositories;
@@ -20,25 +20,25 @@ class BankOutboxWriter(
             .FromSqlInterpolated($"""
                                   WITH picked AS (
                                       SELECT id FROM (
-                                          SELECT "InboundWebhookMessageId" AS id,
+                                          SELECT "Id" AS id,
                                                  "PayloadSizeBytes" AS size,
                                                  SUM("PayloadSizeBytes") OVER (
-                                                     ORDER BY "ReceivedAtUtc", "InboundWebhookMessageId") AS running
-                                          FROM "InboundWebhookMessages"
-                                          WHERE "Status" = 0                       -- Pending
-                                            AND "NextAttemptAtUtc" <= now()
-                                          ORDER BY "ReceivedAtUtc", "InboundWebhookMessageId"
+                                                     ORDER BY "ReceivedAtUtc", "Id") AS running
+                                          FROM banks."InboundWebhookMessages"
+                                          WHERE "Status" = 0                    
+                                            AND "NextAttemptAtUtc" <= now() OR "NextAttemptAtUtc" IS NULL 
+                                          ORDER BY "ReceivedAtUtc", "Id"
                                           LIMIT {maxRows}
                                       ) t
                                       WHERE t.running - t.size < {maxBytes}        -- always takes at least 1 row
                                   ) 
-                                  UPDATE "InboundWebhookMessages" m
+                                  UPDATE banks."InboundWebhookMessages" m
                                   SET "Status" = 1,                                -- Processing
                                       "LockedAtUtc" = now()
-                                  WHERE m."InboundWebhookMessageId" IN (
-                                      SELECT "InboundWebhookMessageId"
-                                      FROM "InboundWebhookMessages"
-                                      WHERE "InboundWebhookMessageId" IN (SELECT id FROM picked)
+                                  WHERE m."Id" IN (
+                                      SELECT "Id"
+                                      FROM banks."InboundWebhookMessages"
+                                      WHERE "Id" IN (SELECT id FROM picked)
                                       FOR UPDATE SKIP LOCKED
                                   )
                                   RETURNING m.*

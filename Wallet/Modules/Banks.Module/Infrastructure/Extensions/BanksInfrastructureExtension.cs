@@ -1,4 +1,5 @@
 using Banks.Application.Interfaces.IRepositories;
+using Banks.Contracts.Interfaces;
 using Banks.Infrastructure.Outbox;
 using Banks.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;

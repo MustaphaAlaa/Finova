@@ -10,7 +10,7 @@ namespace Banks.Application.Services;
 internal sealed class BankWebhooksServices(
     WebhookHeaderSettings webhookSettings,
     IBankTransactionWebhookValidationServices webhookValidationServices,
-    ILogger<BankWebhooksServices> logger
+    ILogger<BankWebhooksServices> logger 
 ) : IBankWebhooksServices
 {
     WebhookHeaders _webhookHeaders;

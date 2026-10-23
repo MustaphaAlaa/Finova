@@ -1,5 +1,3 @@
-using Banks.Contrancts.Interfaces;
-
 namespace Banks.Domain.Entities;
 
 public class Bank
@@ -8,5 +6,4 @@ public class Bank
     public ContractedBanks Name { get; set; }
     public bool Contracted { get; set; }
     public List<BankAccount> BankAccounts { get; set; }
-    public List<InboundWebhookMessage> InboundWebhookMessages { get; set; }
 }

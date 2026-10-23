@@ -1,7 +1,7 @@
-using Banks.Domain;
+using Banks.Contracts.Entities;
 using Finova.Shared.Infrastructure.Interfaces;
 
-namespace Banks.Application.Interfaces.IRepositories;
+namespace Banks.Contracts.Interfaces;
 
 public interface IBankOutboxWriter : IBaseRepository<InboundWebhookMessage>
 {

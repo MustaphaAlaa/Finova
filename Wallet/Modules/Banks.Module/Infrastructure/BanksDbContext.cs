@@ -1,4 +1,4 @@
-using Banks.Domain;
+using Banks.Contracts.Entities;
 using Banks.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,7 +7,10 @@ namespace Banks.Infrastructure;
 public class BanksDbContext : DbContext
 {
     public BanksDbContext(DbContextOptions<BanksDbContext> options)
-        : base(options) { }
+        : base(options)
+    {
+    }
+
     public DbSet<BankAccount> BankAccounts => Set<BankAccount>();
     public DbSet<BankAccountBalance> BankAccountsBalances => Set<BankAccountBalance>();
     public DbSet<Bank> Banks => Set<Bank>();

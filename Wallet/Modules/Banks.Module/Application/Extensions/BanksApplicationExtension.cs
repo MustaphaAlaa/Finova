@@ -13,6 +13,9 @@ public static class BanksApplicationExtension
     {
         services.AddProblemDetails();
         services.AddExceptionHandler<InvalidWebhookRequestExceptionHandler>();
+
+        services.AddScoped<WebhookHeaderSettings>();
+
         services.AddScoped<
             IBankTransactionWebhookValidationServices,
             BankTransactionWebhookValidationServices
@@ -25,6 +28,6 @@ public static class BanksApplicationExtension
 
         services.AddScoped<IBankWebhooksServices, BankWebhooksServices>();
         services.AddScoped<IBankServices, BankServices>();
-        services.AddScoped<IBankTransactionWebhookValidator,BankTransactionWebhookValidator>();
+        services.AddScoped<IBankTransactionWebhookValidator, BankTransactionWebhookValidator>();
     }
 }

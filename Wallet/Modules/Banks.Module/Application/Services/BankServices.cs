@@ -1,11 +1,11 @@
 using System.Text;
-using System.Text.Json;
 using Banks.Application.Dtos;
 using Banks.Application.Interfaces.IRepositories;
 using Banks.Application.Interfaces.IServices;
 using Banks.Application.Interfaces.IValidations;
-using Banks.Domain;
-using Banks.Domain.Entities;
+using Banks.Contracts.Entities;
+using Banks.Contracts.Enums;
+using Banks.Contracts.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace Banks.Application.Services;
@@ -36,7 +36,7 @@ public class BankServices(
             WebhookDeliveryId = request.WebhookDeliveryId,
             EventType = InboundWebhookEventType.TransactionNotification,
             BankId = bank.Id,
-            Bank = bank,
+ 
             Payload = request.Payload,
             PayloadSizeBytes = payloadSizeBytes,
             ReceivedAtUtc = DateTime.UtcNow,
