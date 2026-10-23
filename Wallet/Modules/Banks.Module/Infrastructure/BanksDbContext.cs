@@ -4,15 +4,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Banks.Infrastructure;
 
-internal class BanksDbContext : DbContext
+public class BanksDbContext : DbContext
 {
+    public BanksDbContext(DbContextOptions<BanksDbContext> options)
+        : base(options) { }
     public DbSet<BankAccount> BankAccounts => Set<BankAccount>();
+    public DbSet<BankAccountBalance> BankAccountsBalances => Set<BankAccountBalance>();
     public DbSet<Bank> Banks => Set<Bank>();
     public DbSet<Currency> Currencies => Set<Currency>();
     public DbSet<InboundWebhookMessage> InboundWebhookMessages => Set<InboundWebhookMessage>();
-
-    public BanksDbContext(DbContextOptions<BanksDbContext> options)
-        : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

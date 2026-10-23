@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json;
 using Banks.Application.Dtos;
 using Banks.Application.Interfaces.IRepositories;
 using Banks.Application.Interfaces.IServices;
@@ -21,8 +22,11 @@ public class BankServices(
     {
         await bankTransactionWebhookValidator.ValidateAndEnsureNewDeliveryAsync(request, ct);
 
+
+        var jsonStr = request.Payload.RootElement.GetRawText();
         long payloadSizeBytes =
-            Encoding.UTF8.GetByteCount(request.Payload);
+            Encoding.UTF8.GetByteCount(jsonStr);
+
 
         var bank = await bankRepository.GetBankByName(request.BankCode);
 

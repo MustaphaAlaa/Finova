@@ -35,7 +35,7 @@ public class BankTransactionWebhookValidator(
             throw new ValidationException("Webhook deliveryId is empty");
         }
 
-        if (string.IsNullOrWhiteSpace(request.Payload))
+        if (request.Payload is null || string.IsNullOrWhiteSpace(request.Payload.ToString()))
         {
             logger.LogWarning("Payload is empty");
             throw new ValidationException("Payload is empty");

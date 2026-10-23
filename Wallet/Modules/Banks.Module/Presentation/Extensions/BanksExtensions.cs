@@ -7,11 +7,12 @@ namespace Banks.Extensions;
 
 public static class BanksExtensions
 {
-    public static void AddBanksExtensions(this IServiceCollection services, string connectionString)
+    public static void AddBanksExtensions(this IServiceCollection services,  
+        string connectionString)
     {
         services.AddScoped<WebhookHeaderSettings>();
 
-        services.AddBanksInfrastructure(connectionString);
+        services.AddBanksInfrastructure(connectionString );
         services.AddBanksApplicationServices();
     }
 }
