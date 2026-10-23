@@ -1,0 +1,35 @@
+FROM mcr.microsoft.com/dotnet/sdk:10.0
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl && \
+    rm -rf /var/lib/apt/lists/*
+
+ENV DOTNET_ENVIRONMENT=Development
+ENV DOTNET_USE_POLLING_FILE_WATCHER=true
+ENV DOTNET_WATCH_SUPPRESS_LAUNCH_BROWSER=1
+
+WORKDIR /app/src/finova-wallet
+
+COPY ["Host/Finova.Workers/OutboxWorker/OutboxWorker.csproj", "Host/Finova.Workers/OutboxWorker/"]
+
+COPY  "Modules/Banks.Module/Application/Banks.Application.csproj" "Modules/Banks.Module/Application/"
+
+COPY ["Modules/Banks.Module/Contracts/Banks.Contracts.csproj", "Modules/Banks.Module/Contracts/"]
+COPY ["Modules/Banks.Module/Domain/Banks.Domain.csproj", "Modules/Banks.Module/Domain/"]
+COPY ["Modules/Banks.Module/Infrastructure/Banks.Infrastructure.csproj", "Modules/Banks.Module/Infrastructure/"]
+
+COPY ["Modules/Identity.Module/Contracts/Identity.Contracts.csproj", "Modules/Identity.Module/Contracts/"]
+
+COPY ["Shared/Shared.csproj", "Shared/"]
+
+RUN dotnet restore "Host/Finova.Workers/OutboxWorker/OutboxWorker.csproj"
+
+COPY ["Host/Finova.Workers/OutboxWorker", "Host/Finova.Workers/OutboxWorker/"]
+COPY ["Modules/Banks.Module", "Modules/Banks.Module/"]
+COPY ["Modules/Identity.Module/Contracts", "Modules/Identity.Module/Contracts"]
+
+COPY ["Shared", "Shared/"]
+
+WORKDIR /app/src/finova-wallet/Host/Finova.Workers/OutboxWorker
+
+CMD ["dotnet", "watch", "run", "--non-interactive"]

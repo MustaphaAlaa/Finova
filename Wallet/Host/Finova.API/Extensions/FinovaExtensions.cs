@@ -1,4 +1,4 @@
-using Banks.Extensions;
+using Banks.Application.Extensions;
 using Banks.Infrastructure.Extensions;
 using Finova.Shared.Extensions;
 using IdentityModule.Infrastructure.Extensions;
@@ -18,8 +18,9 @@ public static partial class FinovaExtensions
         }
 
         services.AddIdentityModuleInfrastructure(connectionString);
-        services.AddSharedExtensions(connectionString);
-        services.AddBanksExtensions(connectionString);
+        services.AddSharedExtensions(connectionString); 
+        services.AddBanksInfrastructure(connectionString);
+        services.AddBanksApplicationServices();
 
         using var loggerFactory = LoggerFactory.Create(builder =>
         {

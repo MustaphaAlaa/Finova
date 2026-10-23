@@ -1,6 +1,5 @@
 using Banks.Presentation.Controllers;
 using Finova.API.Extensions;
-using Microsoft.EntityFrameworkCore.Storage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +9,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddHttpClient();
 builder.Services.AddControllers()
     .AddApplicationPart(typeof(BankController).Assembly);
+builder.Services.AddHealthChecks();
 
 
 builder.WebHost.ConfigureKestrel(options => { options.Limits.MaxRequestBodySize = 2 * 1024 * 1024; });
@@ -38,6 +38,10 @@ app.UseAuthorization();
 app.UseCors("allowAll");
 app.UseRequestTimeouts();
 
+
+
 app.MapControllers();
+
+app.MapHealthChecks("/health");
 
 app.Run();

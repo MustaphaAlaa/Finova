@@ -31,17 +31,23 @@ services:
   finova-outbox-worker:
     container_name: finova-outbox-worker-dev
     build:
-      context: "./Wallet/background-services"
-      dockerfile: Dockerfile.OutboxWorker.dev
+      context: "./Wallet"
+      dockerfile: Host/Finova.Workers/Dockerfile.OutboxWorker.dev
     restart: always
     depends_on:
       finova-database:
         condition: service_healthy
+      finova-wallet:
+        condition: service_healthy
     volumes:
-      - ./Wallet/background-services/OutboxWorker:/src/outbox
+      - ./Wallet/Host/Finova.Workers/OutboxWorker:/app/src/finova-wallet/Host/Finova.Workers/OutboxWorker
+    networks:
+      - finova-net
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__finovaWalletDb: Host=finova-database;Database=FinovaDb;Username=finovaAdmin;Password=0000;SSL Mode=Prefer;Include Error Detail=true;
+    stdin_open: true
+    tty: true
 
   finova-wallet:
     container_name: finova-wallet-dev
@@ -54,11 +60,20 @@ services:
         condition: service_healthy
     volumes:
       - ./Wallet/:/src/finova-wallet
+    networks:
+      - finova-net
     ports:
       - "8080:8080"
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__finovaWalletDb: Host=finova-database;Database=FinovaDb;Username=finovaAdmin;Password=0000;SSL Mode=Prefer;Include Error Detail=true;
+    stdin_open: true
+    tty: true
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   finova-database:
     image: postgres:17
@@ -71,6 +86,8 @@ services:
       - "6800:5432"
     volumes:
       - finova_postgres_data:/var/lib/postgresql/data
+    networks:
+      - finova-net
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U finovaAdmin -d FinovaDb"]
       interval: 5s
