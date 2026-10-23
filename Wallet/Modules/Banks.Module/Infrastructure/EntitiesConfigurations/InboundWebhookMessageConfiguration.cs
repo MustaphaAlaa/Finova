@@ -8,8 +8,10 @@ public class InboundWebhookMessageConfiguration : IEntityTypeConfiguration<Inbou
 {
     public void Configure(EntityTypeBuilder<InboundWebhookMessage> builder)
     {
-        builder.HasKey(msg => msg.Id); 
+        builder.HasKey(msg => msg.Id);
+        builder.Property(x => x.Payload)
+            .HasColumnType("jsonb");
         builder.HasIndex(msg => new { msg.ReceivedAtUtc, msg.Id })
-            .HasFilter("[Status] = 0");
+            .HasFilter("\"Status\" = 0");
     }
 }

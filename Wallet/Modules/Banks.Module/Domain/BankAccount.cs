@@ -1,4 +1,4 @@
-namespace Finova.Modules.Banks.Domain.Entities;
+namespace Banks.Domain.Entities;
 
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -12,7 +12,7 @@ public class BankAccount
 
     [ForeignKey("Bank")]
     public required Guid BankId { get; set; }
-    public Bank Bank { get; set; } = null!;
+    public Bank Bank { get; init; }  
 
     [ForeignKey("Currency")]
     public required Guid CurrencyId { get; set; }

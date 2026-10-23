@@ -5,4 +5,4 @@ public class Currency
     public Guid Id { get; set; }
     public required Currencies Code { get; set; }
     public required string Name { get; set; }
-}
+} 

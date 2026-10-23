@@ -1,5 +1,6 @@
 using Banks.Presentation.Controllers;
 using Finova.API.Extensions;
+using Microsoft.EntityFrameworkCore.Storage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,8 @@ builder.Services.AddFinovaServices(builder.Configuration);
 
 var app = builder.Build();
 
+await app.Services.MigrateFinovaDatabasesAsync();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -25,6 +28,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
+
 app.UseRateLimiter();
 app.UseExceptionHandler();
 
@@ -33,6 +37,7 @@ app.UseAuthorization();
 
 app.UseCors("allowAll");
 app.UseRequestTimeouts();
+
 app.MapControllers();
 
 app.Run();

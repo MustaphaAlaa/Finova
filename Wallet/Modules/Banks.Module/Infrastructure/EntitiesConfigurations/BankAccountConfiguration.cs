@@ -1,8 +1,8 @@
-using Finova.Modules.Banks.Domain.Entities;
+using Banks.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Finova.Modules.Banks.Infrastructure;
+namespace Banks.Infrastructure.EntitiesConfigurations;
 
 public class BankAccountConfiguration : IEntityTypeConfiguration<BankAccount>
 {
@@ -14,11 +14,6 @@ public class BankAccountConfiguration : IEntityTypeConfiguration<BankAccount>
             .HasForeignKey(x => x.BankId)
             .IsRequired();
 
-        builder
-            .HasOne(x => x.Currency)
-            .WithMany(x => x.BankAccounts)
-            .HasForeignKey(x => x.CurrencyId)
-            .IsRequired();
 
         builder.HasIndex(x => x.ApplicationUserId);
 

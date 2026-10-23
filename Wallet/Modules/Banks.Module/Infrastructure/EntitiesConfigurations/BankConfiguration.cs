@@ -29,12 +29,14 @@ public class BankConfiguration : IEntityTypeConfiguration<Bank>
             new Bank()
             {
                 Id = Guid.Parse("c9337615-fb2b-4be1-9da0-c9704d546bf6"),
-                Name = ContractedBanks.Acme
+                Name = ContractedBanks.Acme,
+                Contracted = true
             },
             new Bank()
             {
                 Id = Guid.Parse("4b42ad75-6775-44af-931f-f5fb3f38b75a"),
-                Name = ContractedBanks.PayTech
+                Name = ContractedBanks.PayTech,
+                Contracted = true
             },
             new Bank()
             {

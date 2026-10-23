@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json;
 using Banks.Domain.Entities;
 
 namespace Banks.Domain;
@@ -35,7 +36,7 @@ public sealed class InboundWebhookMessage
     /// Gets or sets the original webhook payload received from the bank.
     /// The payload is stored before parsing or business processing.
     /// </summary>
-    public required string Payload { get; init; }
+    public required JsonDocument Payload { get; init; }
 
     public required long PayloadSizeBytes { get; init; }
     public DateTime? LockedAtUtc { get; set; }
