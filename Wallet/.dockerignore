@@ -1,0 +1,5 @@
+**/bin/
+**/obj/
+background-services/
+.env
+.env.*

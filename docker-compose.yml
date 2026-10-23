@@ -1,0 +1,86 @@
+services:
+  redis:
+    image: redis:7.4.11-alpine
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - finova_redis_cache:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - finova-net
+
+  redis-insight:
+    image: redis/redisinsight:latest
+    container_name: redis-insight
+    restart: always
+    ports:
+      - "5540:5540"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - finova-net
+
+  finova-outbox-worker:
+    container_name: finova-outbox-worker-dev
+    build:
+      context: "./Wallet/background-services"
+      dockerfile: Dockerfile.OutboxWorker.dev
+    restart: always
+    depends_on:
+      finova-database:
+        condition: service_healthy
+    volumes:
+      - ./Wallet/background-services/OutboxWorker:/src/outbox
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__finovaWalletDb: Host=finova-database;Database=FinovaDb;Username=finovaAdmin;Password=0000;SSL Mode=Prefer;Include Error Detail=true;
+
+  finova-wallet:
+    container_name: finova-wallet-dev
+    build:
+      context: "./Wallet"
+      dockerfile: Dockerfile.finova-wallet.dev
+    restart: always
+    depends_on:
+      finova-database:
+        condition: service_healthy
+    volumes:
+      - ./Wallet/:/src/finova-wallet
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__finovaWalletDb: Host=finova-database;Database=FinovaDb;Username=finovaAdmin;Password=0000;SSL Mode=Prefer;Include Error Detail=true;
+
+  finova-database:
+    image: postgres:17
+    container_name: finova_postgreSQL_db
+    environment:
+      POSTGRES_USER: finovaAdmin
+      POSTGRES_PASSWORD: "0000"
+      POSTGRES_DB: FinovaDb
+    ports:
+      - "6800:5432"
+    volumes:
+      - finova_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U finovaAdmin -d FinovaDb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  finova_redis_cache:
+  finova_postgres_data:
+
+networks:
+  finova-net:
+    driver: bridge

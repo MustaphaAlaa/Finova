@@ -1,0 +1,18 @@
+FROM mcr.microsoft.com/dotnet/sdk:10.0
+
+ENV DOTNET_ENVIRONMENT=Development
+ENV DOTNET_USE_POLLING_FILE_WATCHER=true
+ENV DOTNET_WATCH_SUPPRESS_LAUNCH_BROWSER=1
+
+WORKDIR /app/src/outbox-background-service
+
+# Restore layer (copy every referenced .csproj here too)
+COPY ["OutboxWorker/OutboxWorker.csproj", "OutboxWorker/"]
+# COPY ["Shared/Shared.csproj", "Shared/"]
+RUN dotnet restore "OutboxWorker/OutboxWorker.csproj"
+
+COPY . .
+
+WORKDIR /app/src/outbox-background-service/OutboxWorker
+
+CMD ["dotnet", "watch", "run", "--non-interactive", "--no-launch-profile"]
