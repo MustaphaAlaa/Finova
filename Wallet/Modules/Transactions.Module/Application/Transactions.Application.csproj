@@ -1,14 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Banks.Module\Application\Banks.Application.csproj" />
-    <ProjectReference Include="..\Domain\Transactions.Domain.csproj" />
-    <ProjectReference Include="..\Contracts\Transactions.Contracts.csproj" />
-    <ProjectReference Include="..\..\Banks.Module\Contracts\Banks.Contracts.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.13" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.13" />
+    <ProjectReference Include="../Domain/Transactions.Domain.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

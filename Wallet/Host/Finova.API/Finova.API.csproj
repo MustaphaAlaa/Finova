@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../../Modules/Identity.Module/Contracts/Identity.Contracts.csproj" />
     <ProjectReference Include="../../Shared/Shared.csproj" />
     <ProjectReference Include="..\..\Modules\Banks.Module\Application\Banks.Application.csproj" />
     <ProjectReference Include="..\..\Modules\Identity.Module\Application\Identity.Application.csproj" />
