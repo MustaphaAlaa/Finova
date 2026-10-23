@@ -1,9 +1,9 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
-using Banks.Domain.Entities;
+using Banks.Contracts.Enums;
 
-namespace Banks.Domain;
+namespace Banks.Contracts.Entities;
 
 /// <summary>
 /// Stores incoming bank webhook notifications for durable, asynchronous processing.
@@ -47,7 +47,6 @@ public sealed class InboundWebhookMessage
     [ForeignKey("Bank")]
     public Guid BankId { get; init; }
 
-    public required Bank Bank { get; init; }
 
     /// <summary>
     /// Gets or sets the UTC date and time when the webhook was received and persisted.

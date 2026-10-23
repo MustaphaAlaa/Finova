@@ -1,7 +1,6 @@
-using Banks.Application.Interfaces.IFactory;
-using Transaction.Contracts.IFactory;
+using Transactions.Application.Interfaces.IFactory;
 
-namespace Transactions.Application.Services.BankTranscationParserFactory;
+namespace Transactions.Application.Services.BankTransactionParserFactory;
 
 public class GothamPaymentsFactory : IBankServicesFactory
 {

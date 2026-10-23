@@ -1,4 +1,5 @@
-namespace Banks.Domain;
+namespace Banks.Contracts.Enums;
+
 
 /// <summary>
 /// Defines the processing states of an inbound webhook message.

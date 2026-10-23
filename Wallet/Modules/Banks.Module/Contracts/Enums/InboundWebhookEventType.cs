@@ -1,4 +1,4 @@
-namespace Banks.Domain.Entities;
+namespace Banks.Contracts.Enums;
 
 public enum InboundWebhookEventType
 {

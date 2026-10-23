@@ -1,9 +1,9 @@
 using System.Globalization;
 using System.Text.Json;
-using Transaction.Contracts.IFactory;
+using Transactions.Application.Interfaces.IFactory;
 using Transactions.Domain;
 
-namespace Transactions.Application.Services.BankTranscationParserFactory;
+namespace Transactions.Application.Services.BankTransactionParserFactory;
 
 public class PayTechParser : ITransactionStringParser
 {
@@ -15,20 +15,20 @@ public class PayTechParser : ITransactionStringParser
 
         ReadOnlySpan<char> chars = transactionString.AsSpan();
 
-        var firstSepartor = chars.IndexOf(',');
-        var secondSepartor = chars.IndexOf('#');
-        var thirdSepartor = chars.LastIndexOf('#');
+        var firstSeparator = chars.IndexOf(',');
+        var secondSeparator = chars.IndexOf('#');
+        var thirdSeparator = chars.LastIndexOf('#');
 
-        if (firstSepartor == -1 || secondSepartor == -1 || thirdSepartor == -1)
+        if (firstSeparator == -1 || secondSeparator == -1 || thirdSeparator == -1)
             throw new FormatException("Invalid Transaction Format");
 
-        DateTime parsedDate = GetDate(chars, firstSepartor);
+        DateTime parsedDate = GetDate(chars, firstSeparator);
 
-        decimal parsedAmount = GetAmount(chars, firstSepartor, secondSepartor);
+        decimal parsedAmount = GetAmount(chars, firstSeparator, secondSeparator);
 
-        Dictionary<string, string> metadataDictionary = GetMetadateDictionary(chars, thirdSepartor);
+        Dictionary<string, string> metadataDictionary = GetMetadateDictionary(chars, thirdSeparator);
 
-        ReadOnlySpan<char> reference = chars[(secondSepartor + 1)..thirdSepartor];
+        ReadOnlySpan<char> reference = chars[(secondSeparator + 1)..thirdSeparator];
 
         var transactionNotification = new BankTransaction
         {
@@ -40,9 +40,9 @@ public class PayTechParser : ITransactionStringParser
         return transactionNotification;
     }
 
-    private DateTime GetDate(ReadOnlySpan<char> chars, int firstSepartor)
+    private DateTime GetDate(ReadOnlySpan<char> chars, int firstSeparator)
     {
-        ReadOnlySpan<char> date = chars[..firstSepartor];
+        ReadOnlySpan<char> date = chars[..firstSeparator];
 
         if (
             !DateTime.TryParseExact(
@@ -57,9 +57,9 @@ public class PayTechParser : ITransactionStringParser
         return parsedDate;
     }
 
-    private decimal GetAmount(ReadOnlySpan<char> chars, int firstSepartor, int secondSepartor)
+    private decimal GetAmount(ReadOnlySpan<char> chars, int firstSeparator, int secondSeparator)
     {
-        ReadOnlySpan<char> amount = chars[(firstSepartor + 1)..secondSepartor];
+        ReadOnlySpan<char> amount = chars[(firstSeparator + 1)..secondSeparator];
 
         if (!decimal.TryParse(amount, out var parsedAmount))
             throw new FormatException("Cannot Parse the Amount");

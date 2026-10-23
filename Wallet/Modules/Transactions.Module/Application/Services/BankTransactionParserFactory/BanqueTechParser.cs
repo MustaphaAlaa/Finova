@@ -1,7 +1,7 @@
-using Transaction.Contracts.IFactory;
-using Transactions.Domain;
-
-namespace Transactions.Application.Services.BankTranscationParserFactory;
+ using Transactions.Application.Interfaces.IFactory;
+ using Transactions.Domain;
+ 
+namespace Transactions.Application.Services.BankTransactionParserFactory;
 
 public class BanqueTechParser : ITransactionStringParser
 {

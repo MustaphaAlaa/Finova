@@ -1,3 +1,5 @@
+using Banks.Contrancts.Interfaces;
+
 namespace Banks.Domain.Entities;
 
 public class Bank

@@ -1,7 +1,8 @@
-using Transaction.Contracts.IFactory; 
+ 
+using Transactions.Application.Interfaces.IFactory;
 using Transactions.Domain;
 
-namespace Transactions.Application.Services.BankTranscationParserFactory;
+namespace Transactions.Application.Services.BankTransactionParserFactory;
 
 public class GothamPaymentsParser : ITransactionStringParser
 {
@@ -10,4 +11,3 @@ public class GothamPaymentsParser : ITransactionStringParser
         throw new NotImplementedException();
     }
 }
- 

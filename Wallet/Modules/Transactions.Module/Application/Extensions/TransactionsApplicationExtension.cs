@@ -1,8 +1,7 @@
-using Banks.Application.Interfaces.IFactory;
 using Banks.Domain.Entities;
 using Microsoft.Extensions.DependencyInjection;
-using Transactions.Application.Services;
-using Transactions.Application.Services.BankTranscationParserFactory;
+using Transactions.Application.Interfaces.IFactory; 
+using Transactions.Application.Services.BankTransactionParserFactory; 
 
 namespace Transactions.Application.Extensions;
 
