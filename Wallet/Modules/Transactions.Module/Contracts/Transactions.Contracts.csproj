@@ -5,4 +5,7 @@
     <Nullable>enable</Nullable>
     <RootNamespace>Transaction.Contracts</RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../Banks.Module/Contracts/Banks.Contracts.csproj" />
+  </ItemGroup>
 </Project>

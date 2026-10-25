@@ -13,6 +13,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../../../Modules/Transactions.Module/Application/Transactions.Application.csproj" />
+    <ProjectReference Include="../../../Modules/Transactions.Module/Contracts/Transactions.Contracts.csproj" />
+    <ProjectReference Include="../../../Modules/Transactions.Module/Infrastructure/Transactions.Infrastructure.csproj" />
     <ProjectReference Include="..\..\..\Modules\Banks.Module\Infrastructure\Banks.Infrastructure.csproj" />
   </ItemGroup>
 </Project>

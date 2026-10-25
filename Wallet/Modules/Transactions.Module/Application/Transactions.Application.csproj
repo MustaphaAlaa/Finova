@@ -5,6 +5,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../Contracts/Transactions.Contracts.csproj" />
     <ProjectReference Include="../Domain/Transactions.Domain.csproj" />
   </ItemGroup>
 
