@@ -29,7 +29,11 @@ internal sealed class BankTransactionWebhookValidationServices(
     {
         var headers = context.HttpContext.Request.Headers;
 
-        _routeParameter = requestUtilities.GetRouteParameterValue(context, "bankCode");
+        _routeParameter = requestUtilities.GetRouteParameterValue(
+            context,
+            context.Result,
+            "bankCode"
+        );
 
         bool checkSignatureHeader = TryValidateSignatureHeader(context, headers);
 
@@ -111,7 +115,7 @@ internal sealed class BankTransactionWebhookValidationServices(
                 try
                 {
                     var minimumAllowedTimestampTicks =
-                        DateTime.UtcNow.Ticks - TimeSpan.TicksPerMinute * 60 * 24;
+                        DateTime.UtcNow.Ticks - TimeSpan.TicksPerMinute * 60 * 124;
                     var requestTimestampTicks = DateTimeOffset
                         .FromUnixTimeSeconds(unixTimestampSeconds)
                         .Ticks;

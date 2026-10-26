@@ -16,10 +16,12 @@ public sealed class BankController(IBankServices bankServices) : ControllerBase
     [HttpPost("{bankCode}/transaction")]
     [RequestSizeLimit((long)RequestSizeLimits.TransactionWebhook)]
     [RequestTimeout("Long")]
+    [TypeFilter(typeof(IdempotencyAttribute))]
     [AuthorizeBankTransactionWebhook]
     public async Task<IActionResult> ReceiveTransactionNotificationAsync(
         BankTransactionWebhookRequest request,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         try
         {

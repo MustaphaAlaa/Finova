@@ -7,12 +7,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddHttpClient();
-builder.Services.AddControllers()
-    .AddApplicationPart(typeof(BankController).Assembly);
-builder.Services.AddHealthChecks();
+builder.Services.AddControllers().AddApplicationPart(typeof(BankController).Assembly);
+builder.Services.AddHealthChecks().AddRedis(builder.Configuration.GetConnectionString("Redis"));
 
-
-builder.WebHost.ConfigureKestrel(options => { options.Limits.MaxRequestBodySize = 2 * 1024 * 1024; });
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 2 * 1024 * 1024;
+});
 
 builder.Services.AddFinovaServices(builder.Configuration);
 
@@ -37,8 +38,6 @@ app.UseAuthorization();
 
 app.UseCors("allowAll");
 app.UseRequestTimeouts();
-
-
 
 app.MapControllers();
 

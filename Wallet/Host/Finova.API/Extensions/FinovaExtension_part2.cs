@@ -23,7 +23,7 @@ public static partial class FinovaExtensions
                     factory: partition => new FixedWindowRateLimiterOptions
                     {
                         AutoReplenishment = true,
-                        PermitLimit = 10,
+                        PermitLimit = 20,
                         QueueLimit = 0,
                         Window = TimeSpan.FromMinutes(1),
                     }
