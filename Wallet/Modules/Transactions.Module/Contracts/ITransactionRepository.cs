@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Banks.Contracts.Entities;
 using Finova.Shared.Infrastructure.Interfaces;
 using Transaction.Contracts.Enums;
@@ -27,7 +28,7 @@ public interface ITransactionRepository : IBaseRepository<BankTransaction>
     );
 
     Task<int> WriteTransactionsProcessingRecordAsync(
-        List<TransacitonProcessingRecord> records,
+        ConcurrentBag<TransacitonProcessingRecord> records,
         CancellationToken ct
     );
 

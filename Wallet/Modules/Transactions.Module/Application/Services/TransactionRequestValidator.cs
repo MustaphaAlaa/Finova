@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Linq.Expressions;
 using Banks.Contracts.Entities;
 using Microsoft.Extensions.Logging;
@@ -41,38 +42,43 @@ public class TransactionServicesValidator(
             throw new ArgumentException("Transaction is required.");
     }
 
-    public async Task<List<TransactionsRequest>> ValidateTransactionRequestsAsync(
+    public async Task<ConcurrentBag<TransactionsRequest>> ValidateTransactionRequestsAsync(
         List<TransactionsRequest> requests,
         CancellationToken cancellationToken
     )
     {
         ArgumentNullException.ThrowIfNull(requests);
 
-        var validRequests = new List<TransactionsRequest>(requests.Count);
-        var failedRecords = new List<TransacitonProcessingRecord>();
+        var validRequests = new ConcurrentBag<TransactionsRequest>();
+        var failedRecords = new ConcurrentBag<TransacitonProcessingRecord>();
 
-        foreach (var req in requests)
+        Parallel.ForEach ( requests,
+        new ParallelOptions
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
+            CancellationToken=  cancellationToken,
+            MaxDegreeOfParallelism = 3
+        }
+        , (request) =>
+        {
+           
             try
             {
-                ValidateTransactionRequest(req);
-                validRequests.Add(req);
+                ValidateTransactionRequest(request);
+                validRequests.Add(request);
             }
             catch (ArgumentException ex)
             {
                 failedRecords.Add(
                     new TransacitonProcessingRecord
                     {
-                        TransactionId = req.TransactionId,
+                        TransactionId = request.TransactionId,
                         ProcessedAtUtc = DateTime.UtcNow,
                         Reason = ex.Message,
                         Status = TransactionMessageProcessingStatus.Rejected,
                     }
                 );
-            }
-        }
+            } 
+        });
 
         if (failedRecords.Count > 0)
         {

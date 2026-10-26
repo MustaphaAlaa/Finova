@@ -91,7 +91,7 @@ public sealed class BankTransactionStager(NpgsqlDataSource dataSource) : IBankTr
             }
 
             await transaction.CommitAsync(ct);
-            return  inserted;
+            return inserted;
         }
         catch
         {

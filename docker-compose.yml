@@ -1,32 +1,53 @@
 services:
-  redis:
-    image: redis:7.4.11-alpine
-    container_name: redis
-    restart: always
-    ports:
-      - "6379:6379"
-    volumes:
-      - finova_redis_cache:/data
-    command: redis-server --appendonly yes
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-    networks:
-      - finova-net
 
-  redis-insight:
-    image: redis/redisinsight:latest
-    container_name: redis-insight
-    restart: always
+  # redis:
+  #   image: redis:7.4.11-alpine
+  #   container_name: redis
+  #   restart: always
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - finova_redis_cache:/data
+  #   command: redis-server --appendonly yes
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 5s
+  #     timeout: 3s
+  #     retries: 5
+  #   networks:
+  #     - finova-net
+
+  # redis-insight:
+  #   image: redis/redisinsight:latest
+  #   container_name: redis-insight
+  #   restart: always
+  #   ports:
+  #     - "5540:5540"
+  #   depends_on:
+  #     redis:
+  #       condition: service_healthy
+  #   networks:
+  #     - finova-net
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: finova-rabbitmq
     ports:
-      - "5540:5540"
-    depends_on:
-      redis:
-        condition: service_healthy
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: finova
+      RABBITMQ_DEFAULT_PASS: admin
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
     networks:
       - finova-net
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   finova-outbox-worker:
     container_name: finova-outbox-worker-dev
@@ -38,6 +59,8 @@ services:
       finova-database:
         condition: service_healthy
       finova-wallet:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     volumes:
       - ./Wallet/Host/Finova.Workers/OutboxWorker:/app/src/finova-wallet/Host/Finova.Workers/OutboxWorker
@@ -97,6 +120,7 @@ services:
 volumes:
   finova_redis_cache:
   finova_postgres_data:
+  rabbitmq-data:
 
 networks:
   finova-net:

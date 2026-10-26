@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Banks.Contracts.Entities;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
@@ -38,6 +39,26 @@ public sealed class TransactionRepository(
         CancellationToken cancellationToken
     )
     {
+        await Db.MessageProcessingRecords.AddAsync(
+            new MessageProcessingRecord
+            {
+                Id = Guid.NewGuid(),
+                MessageId = message.Id,
+                Status = status,
+                Reason = reason,
+                ProcessedAtUtc = DateTime.UtcNow,
+            },
+            cancellationToken
+        );
+    }
+   
+    public async Task SetMessageStatusAsync(
+        InboundWebhookMessage message,
+        TransactionMessageProcessingStatus status,
+        string? reason,
+        CancellationToken cancellationToken
+    )
+    {
         await Db.AddAsync(
             new MessageProcessingRecord
             {
@@ -52,7 +73,7 @@ public sealed class TransactionRepository(
     }
 
     public async Task<int> WriteTransactionsProcessingRecordAsync(
-        List<TransacitonProcessingRecord> records,
+        ConcurrentBag<TransacitonProcessingRecord> records,
         CancellationToken ct
     )
     {
