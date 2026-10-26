@@ -20,6 +20,10 @@ COPY ["Modules/Banks.Module/Infrastructure/Banks.Infrastructure.csproj", "Module
 
 COPY ["Modules/Identity.Module/Contracts/Identity.Contracts.csproj", "Modules/Identity.Module/Contracts/"]
 
+COPY ["Modules/Transactions.Module/Infrastructure/Transactions.Infrastructure.csproj", "Modules/Transactions.Module/Infrastructure/"]
+
+COPY ["Modules/Transactions.Module/Contracts/Transactions.Contracts.csproj", "Modules/Transactions.Module/Contracts/"]
+
 COPY ["Shared/Shared.csproj", "Shared/"]
 
 RUN dotnet restore "Host/Finova.Workers/OutboxWorker/OutboxWorker.csproj"
@@ -27,7 +31,7 @@ RUN dotnet restore "Host/Finova.Workers/OutboxWorker/OutboxWorker.csproj"
 COPY ["Host/Finova.Workers/OutboxWorker", "Host/Finova.Workers/OutboxWorker/"]
 COPY ["Modules/Banks.Module", "Modules/Banks.Module/"]
 COPY ["Modules/Identity.Module/Contracts", "Modules/Identity.Module/Contracts"]
-
+COPY ["Modules/Transactions.Module", "Modules/Transactions.Module"]
 COPY ["Shared", "Shared/"]
 
 WORKDIR /app/src/finova-wallet/Host/Finova.Workers/OutboxWorker
