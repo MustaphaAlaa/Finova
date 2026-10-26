@@ -1,3 +1,4 @@
+using Banks.Contracts.Entities;
 using Banks.Contrancts.Enums;
 using Banks.Domain.Entities;
 using Microsoft.EntityFrameworkCore;

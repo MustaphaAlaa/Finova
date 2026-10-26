@@ -25,8 +25,11 @@ class BankOutboxWriter(
                                                  SUM("PayloadSizeBytes") OVER (
                                                      ORDER BY "ReceivedAtUtc", "Id") AS running
                                           FROM banks."InboundWebhookMessages"
-                                          WHERE "Status" = 0                    
-                                            AND "NextAttemptAtUtc" <= now() OR "NextAttemptAtUtc" IS NULL 
+                                            WHERE "Status" = 0
+                                            AND (
+                                                "NextAttemptAtUtc" <= now()
+                                                OR "NextAttemptAtUtc" IS NULL
+                                            )
                                           ORDER BY "ReceivedAtUtc", "Id"
                                           LIMIT {maxRows}
                                       ) t

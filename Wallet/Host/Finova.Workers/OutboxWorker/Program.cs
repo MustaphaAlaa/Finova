@@ -15,6 +15,7 @@ if (string.IsNullOrWhiteSpace(connectionString))
 
 builder.Services.AddBanksInfrastructure(connectionString);
 builder.Services.AddTransactionsInfrastructure(connectionString);
+
 builder.Services.AddTransactionsApplicationServices();
 
 

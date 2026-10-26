@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Text.Json;
 using Banks.Contracts.Entities;
 using Banks.Contracts.Interfaces;
@@ -31,7 +32,9 @@ public sealed class MessagePublisher(
                     ct: stoppingToken
                 );
 
-                if (claimed.Count == 0)
+                ConcurrentBag<InboundWebhookMessage> claimedBag = new(claimed);
+
+                if (claimedBag.IsEmpty)
                 {
                     await Task.Delay(_opt.IdleDelay, stoppingToken);
                     continue;
@@ -40,7 +43,7 @@ public sealed class MessagePublisher(
                 // Bounded parallelism. Each message gets its own connection + transaction.
 
                 await Parallel.ForEachAsync(
-                    claimed,
+                    claimedBag,
                     new ParallelOptions
                     {
                         MaxDegreeOfParallelism = _opt.MaxConcurrency,
