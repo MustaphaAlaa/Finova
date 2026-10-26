@@ -1,3 +1,5 @@
+using Banks.Contrancts.Enums;
+
 namespace Banks.Domain.Entities;
 
 public class Bank

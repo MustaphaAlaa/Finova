@@ -36,7 +36,7 @@ public class BankServices(
             WebhookDeliveryId = request.WebhookDeliveryId,
             EventType = InboundWebhookEventType.TransactionNotification,
             BankId = bank.Id,
- 
+            BankCode = request.BankCode,
             Payload = request.Payload,
             PayloadSizeBytes = payloadSizeBytes,
             ReceivedAtUtc = DateTime.UtcNow,

@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
 using Banks.Contracts.Enums;
+using Banks.Contrancts.Enums;
 
 namespace Banks.Contracts.Entities;
 
@@ -47,6 +48,8 @@ public sealed class InboundWebhookMessage
     [ForeignKey("Bank")]
     public Guid BankId { get; init; }
 
+    public ContractedBanks BankCode { get; init; }
+
 
     /// <summary>
     /// Gets or sets the UTC date and time when the webhook was received and persisted.
@@ -79,5 +82,5 @@ public sealed class InboundWebhookMessage
     /// <summary>
     /// Gets or sets the current processing status of the webhook message.
     /// </summary>
-    public InboundTransactionWebhookOutboxMessageStatus Status { get; init; }
+    public InboundTransactionWebhookOutboxMessageStatus Status { get; init; } 
 }

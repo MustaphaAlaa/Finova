@@ -1,4 +1,5 @@
 using Banks.Application.Interfaces.IRepositories;
+using Banks.Contrancts.Enums;
 using Banks.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Shared.Infrastructure.Repositories;
@@ -9,7 +10,7 @@ internal sealed class BankRepository(BanksDbContext dbContext)
     : BaseRepository<Bank, BanksDbContext>(dbContext),
         IBankRepository
 {
-    public async Task<Bank> GetBankByName(Domain.Entities.ContractedBanks bank)
+    public async Task<Bank> GetBankByName(ContractedBanks bank)
     {
         var res = await Db.Banks.SingleOrDefaultAsync(b => b.Name == bank);
         return res;

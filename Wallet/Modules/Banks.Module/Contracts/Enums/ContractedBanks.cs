@@ -1,8 +1,8 @@
-namespace Banks.Domain.Entities;
+namespace Banks.Contrancts.Enums;
 
 public enum ContractedBanks
 {
-    Acme,
+    Acme = 1,
     PayTech,
     GothamPayments,
     BanqueTech,

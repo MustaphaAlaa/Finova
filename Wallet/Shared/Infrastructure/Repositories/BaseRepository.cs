@@ -21,6 +21,10 @@ public class BaseRepository<TEntity, TDbContext>(TDbContext context) : IBaseRepo
         await Db.Set<TEntity>().AddAsync(entity, ct);
         return entity;
     }
+    public async Task CreateRangeAsync(TEntity[] entity, CancellationToken ct = default)
+    {
+        await Db.Set<TEntity>().AddRangeAsync(entity, ct); 
+    }
 
     /// <summary>
     /// Asynchronously deletes an entity from the database based on a predicate.
@@ -97,4 +101,5 @@ public class BaseRepository<TEntity, TDbContext>(TDbContext context) : IBaseRepo
     {
         return await Db.Set<TEntity>().ToListAsync(ct);
     }
+
 }

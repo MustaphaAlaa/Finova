@@ -1,3 +1,4 @@
+using Banks.Contracts.Entities;
 using Banks.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

@@ -6,6 +6,7 @@ public interface IBaseRepository<TEntity>
     where TEntity : class
 {
     Task<TEntity> CreateAsync(TEntity entity, CancellationToken ct = default);
+    Task CreateRangeAsync(TEntity[] entity, CancellationToken ct = default);
 
     Task DeleteAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken ct = default);
     Task<List<TEntity>> RetrieveAllAsync(CancellationToken ct = default);

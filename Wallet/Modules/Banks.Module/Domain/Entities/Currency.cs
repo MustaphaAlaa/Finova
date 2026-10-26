@@ -1,3 +1,5 @@
+using Banks.Contracts.Entities;
+
 namespace Banks.Domain.Entities;
 
 public class Currency
