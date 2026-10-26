@@ -1,14 +1,13 @@
 using System.Globalization;
-using Transactions.Application.Interfaces.IFactory;
-using Transactions.Domain;
+using Transactions.Contracts.Entities;
 
 namespace Transactions.Application.Services.BankTransactionParserFactory;
 
 public class AcmeParser : ITransactionStringParser
 {
     public BankTransaction Parse(string transactionString)
-    { 
-        // Transaction Format:  Amount (two decimals) //reference, and it could be any string//date
+    {
+        // Transaction Format:  Amount (two decimals)//reference, and it could be any string//date(yyyyMMddHHmm)
 
         ArgumentException.ThrowIfNullOrWhiteSpace(transactionString);
 
@@ -31,7 +30,8 @@ public class AcmeParser : ITransactionStringParser
         {
             Amount = parsedAmount,
             Reference = reference,
-            Date = parsedDate
+            Date = parsedDate,
+            Metadata = null
         };
         return transactionNotification;
     }

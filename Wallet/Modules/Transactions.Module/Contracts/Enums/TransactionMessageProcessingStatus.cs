@@ -1,4 +1,4 @@
-namespace Transaction.Domain.Enums;
+namespace Transaction.Contracts.Enums;
 
 public enum TransactionMessageProcessingStatus
 {

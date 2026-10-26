@@ -1,9 +1,11 @@
-﻿using Transaction.Domain.Enums;
+﻿using System.ComponentModel.DataAnnotations;
+using Transaction.Contracts.Enums;
 
-namespace Transaction.Domain;
+namespace Transactions.Contracts.Entities;
 
-public class MessageProcessingRecords
+public class MessageProcessingRecord
 {
+    [Key]
     public Guid Id { get; set; }
     public Guid MessageId { get; set; }
     public string? Reason { get; set; }

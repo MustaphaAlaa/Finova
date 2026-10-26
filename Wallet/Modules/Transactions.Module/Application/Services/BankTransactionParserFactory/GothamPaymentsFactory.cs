@@ -1,8 +1,9 @@
 using Transactions.Application.Interfaces.IFactory;
+using Transactions.Contracts.Entities;
 
 namespace Transactions.Application.Services.BankTransactionParserFactory;
 
-public class GothamPaymentsFactory : IBankServicesFactory
+public class GothamPaymentsFactory : IBankTransactionFactory
 {
     public ITransactionStringParser CreateTransactionParser()
     {

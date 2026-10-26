@@ -1,31 +1,39 @@
-using Banks.Domain.Entities;
+using Banks.Contrancts.Enums;
 using Microsoft.Extensions.DependencyInjection;
-using Transactions.Application.Interfaces.IFactory; 
-using Transactions.Application.Services.BankTransactionParserFactory; 
+using Transaction.Application.Services;
+using Transactions.Application.Interfaces.IFactory;
+using Transactions.Application.Services;
+using Transactions.Application.Services.BankTransactionParserFactory;
+using Transactions.Contracts.Interfaces;
 
 namespace Transactions.Application.Extensions;
 
 public static class TransactionsApplicationExtension
 {
-    public static void AddBanksApplicationServices(this IServiceCollection services)
+    public static void AddTransactionsApplicationServices(this IServiceCollection services)
     {
-        BankFactoryServices(services);
+        services.AddScoped<BankTransactionParserResolver>();
+
+        services.AddScoped<ITransactionServies, TransactionServices>();
+
+        services.AddScoped<ITransactionServicesValidator, TransactionServicesValidator>();
+
+        ParserFactoryServices(services);
     }
 
-
-    private static void BankFactoryServices(IServiceCollection services)
+    private static void ParserFactoryServices(IServiceCollection services)
     {
-        services.AddKeyedScoped<IBankServicesFactory, AcmeFactory>(nameof(ContractedBanks.Acme));
+        services.AddKeyedScoped<IBankTransactionFactory, AcmeFactory>(nameof(ContractedBanks.Acme));
 
-        services.AddKeyedScoped<IBankServicesFactory, PayTechFactory>(
+        services.AddKeyedScoped<IBankTransactionFactory, PayTechFactory>(
             nameof(ContractedBanks.PayTech)
         );
 
-        services.AddKeyedScoped<IBankServicesFactory, GothamPaymentsFactory>(
+        services.AddKeyedScoped<IBankTransactionFactory, GothamPaymentsFactory>(
             nameof(ContractedBanks.GothamPayments)
         );
 
-        services.AddKeyedScoped<IBankServicesFactory, BanqueTechFactory>(
+        services.AddKeyedScoped<IBankTransactionFactory, BanqueTechFactory>(
             nameof(ContractedBanks.BanqueTech)
         );
     }

@@ -1,7 +1,6 @@
 using System.Globalization;
 using System.Text.Json;
-using Transactions.Application.Interfaces.IFactory;
-using Transactions.Domain;
+using Transactions.Contracts.Entities;
 
 namespace Transactions.Application.Services.BankTransactionParserFactory;
 
@@ -26,7 +25,10 @@ public class PayTechParser : ITransactionStringParser
 
         decimal parsedAmount = GetAmount(chars, firstSeparator, secondSeparator);
 
-        Dictionary<string, string> metadataDictionary = GetMetadateDictionary(chars, thirdSeparator);
+        Dictionary<string, string> metadataDictionary = GetMetadateDictionary(
+            chars,
+            thirdSeparator
+        );
 
         ReadOnlySpan<char> reference = chars[(secondSeparator + 1)..thirdSeparator];
 
@@ -35,7 +37,7 @@ public class PayTechParser : ITransactionStringParser
             Amount = parsedAmount,
             Reference = reference.ToString(),
             Date = parsedDate,
-            Paylod = JsonSerializer.Serialize(metadataDictionary)
+            Metadata = JsonDocument.Parse(JsonSerializer.Serialize(metadataDictionary)),
         };
         return transactionNotification;
     }

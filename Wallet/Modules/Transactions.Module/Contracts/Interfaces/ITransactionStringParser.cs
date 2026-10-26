@@ -1,6 +1,4 @@
-using Transactions.Domain;
-
-namespace Transactions.Application.Interfaces.IFactory;
+namespace Transactions.Contracts.Entities;
 
 public interface ITransactionStringParser
 {
