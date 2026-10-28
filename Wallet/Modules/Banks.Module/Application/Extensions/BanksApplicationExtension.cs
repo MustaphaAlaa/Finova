@@ -3,6 +3,7 @@ using Banks.Application.Interfaces;
 using Banks.Application.Interfaces.IServices;
 using Banks.Application.Interfaces.IValidations;
 using Banks.Application.Services;
+using Banks.Application.Services.WebhookFilter;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Banks.Application.Extensions;
@@ -14,20 +15,20 @@ public static class BanksApplicationExtension
         services.AddProblemDetails();
         services.AddExceptionHandler<InvalidWebhookRequestExceptionHandler>();
 
-        services.AddScoped<WebhookHeaderSettings>();
+        services.AddScoped<WebhookAuthenticationConfiguration>();
 
         services.AddScoped<
-            IBankTransactionWebhookValidationServices,
-            BankTransactionWebhookValidationServices
+            IWebhookRequestAuthenticator,
+            WebhookRequestAuthenticator
         >();
 
         services.AddScoped<
-            IAuthorizeBankTransactionWebhookFilter,
-            AuthorizeBankTransactionWebhookFilter
+            IBankTransactionWebhookAuthorizationFilter,
+            BankTransactionWebhookAuthorizationAuthorizationFilter
         >();
 
-        services.AddScoped<IBankWebhooksServices, BankWebhooksServices>();
+        services.AddScoped<IBankWebhookAuthorizationService, BankWebhookAuthorizationService>();
         services.AddScoped<IBankServices, BankServices>();
-        services.AddScoped<IBankTransactionWebhookValidator, BankTransactionWebhookValidator>();
+        services.AddScoped<IWebhookDeliveryValidator, WebhookDeliveryValidator>();
     }
 }

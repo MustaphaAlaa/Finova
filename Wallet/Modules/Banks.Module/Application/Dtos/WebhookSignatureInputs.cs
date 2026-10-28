@@ -1,6 +1,6 @@
-namespace Banks.Application;
+namespace Banks.Application.Dtos;
 
-public class WebhookHeaders(byte[] signatureBytes, byte[] timestampBytes, byte[] secretKeyBytes)
+public class WebhookSignatureInputs(byte[] signatureBytes, byte[] timestampBytes, byte[] secretKeyBytes)
 {
     public byte[] SignatureBytes { get; set; } = signatureBytes;
     public byte[] TimestampBytes { get; set; } = timestampBytes;

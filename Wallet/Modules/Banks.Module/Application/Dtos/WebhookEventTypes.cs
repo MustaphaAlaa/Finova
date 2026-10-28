@@ -1,4 +1,4 @@
-namespace Banks.Application;
+namespace Banks.Application.Dtos;
 
 public static class WebhookEventTypes
 {

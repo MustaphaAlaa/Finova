@@ -1,5 +1,5 @@
 using System.Text.Json;
-using Banks.Contrancts.Enums; 
+using Banks.Contracts.Enums;
 
 namespace Banks.Application.Dtos;
 

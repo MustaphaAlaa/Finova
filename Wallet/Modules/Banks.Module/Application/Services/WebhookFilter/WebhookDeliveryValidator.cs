@@ -5,21 +5,27 @@ using Banks.Application.Interfaces.IValidations;
 using Banks.Contracts.Interfaces;
 using Microsoft.Extensions.Logging;
 
-namespace Banks.Application.Services;
+namespace Banks.Application.Services.WebhookFilter;
 
-public class BankTransactionWebhookValidator(
+/// <inheritdoc/>
+/// <param name="bankRepository"><see cref="IBankRepository"/></param>
+/// <param name="outboxWriter"><see cref="IBankOutboxWriter"/></param>
+/// <param name="logger">
+/// The logger used to log messages for <see cref="WebhookDeliveryValidator"/>.
+/// </param>
+public class WebhookDeliveryValidator(
     IBankRepository bankRepository,
     IBankOutboxWriter outboxWriter,
-    ILogger<BankTransactionWebhookValidator> logger
-) : IBankTransactionWebhookValidator
+    ILogger<WebhookDeliveryValidator> logger
+) : IWebhookDeliveryValidator
 {
-    public async Task ValidateAndEnsureNewDeliveryAsync(BankTransactionWebhookRequest request, CancellationToken ct)
+    public async Task ValidateNewDeliveryAsync(BankTransactionWebhookRequest request, CancellationToken ct)
     {
-        ValidateRequest(request);
+        ValidateRequiredFields(request);
 
-        await ValidateRequestBank(request);
+        await ValidateBankAsync(request, ct);
 
-        var deliveryAlreadyExists = await outboxWriter.IsWebhookDeliveryIdExistAsync(request.WebhookDeliveryId, ct);
+        var deliveryAlreadyExists = await outboxWriter.ExistsByDeliveryIdAsync(request.WebhookDeliveryId, ct);
 
         if (deliveryAlreadyExists)
         {
@@ -28,7 +34,7 @@ public class BankTransactionWebhookValidator(
         }
     }
 
-    void ValidateRequest(BankTransactionWebhookRequest request)
+    void ValidateRequiredFields(BankTransactionWebhookRequest request)
     {
         if (request.WebhookDeliveryId == Guid.Empty)
         {
@@ -49,9 +55,9 @@ public class BankTransactionWebhookValidator(
         }
     }
 
-    private async Task ValidateRequestBank(BankTransactionWebhookRequest request)
+    private async Task ValidateBankAsync(BankTransactionWebhookRequest request, CancellationToken ct)
     {
-        var bank = await bankRepository.GetBankByName(request.BankCode);
+        var bank = await bankRepository.GetBankByNameAsync(request.BankCode, ct);
 
         if (bank == null)
         {

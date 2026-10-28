@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace Banks.Application;
+namespace Banks.Application.Dtos;
 
 public class Result<T>
 {
