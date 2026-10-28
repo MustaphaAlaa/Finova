@@ -1,4 +1,4 @@
-namespace Banks.Contracts.Entities;
+namespace Transaction.Contracts.Entities;
 
 public enum Currencies
 {

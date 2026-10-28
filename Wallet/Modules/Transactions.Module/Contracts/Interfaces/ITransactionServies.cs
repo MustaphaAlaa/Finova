@@ -1,8 +1,8 @@
 using Banks.Contracts.Entities;
 using Banks.Contracts.Enums;
-using Transactions.Contracts.Entities;
+using Transaction.Contracts.Entities;
 
-namespace Transactions.Contracts.Interfaces;
+namespace Transaction.Contracts.Interfaces;
 
 public interface ITransactionServies
 {

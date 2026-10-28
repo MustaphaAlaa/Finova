@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Transactions.Contracts.Entities;
+using Transaction.Contracts.Entities;
 
-namespace Transactions.Infrastructe.EntitiesConfigurations;
+namespace Transaction.Infrastructure.EntitiesConfiguration;
 
 public class BankTransactionConfigurations : IEntityTypeConfiguration<BankTransaction>
 {

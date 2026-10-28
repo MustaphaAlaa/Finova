@@ -1,10 +1,10 @@
-using Banks.Contrancts.Enums;
+using Banks.Contracts.Enums;
 using Microsoft.Extensions.DependencyInjection;
-using Transaction.Application.Services;
+using Transaction.Contracts.Interfaces;
 using Transactions.Application.Interfaces.IFactory;
+using Transactions.Application.Interfaces.IValidations;
 using Transactions.Application.Services;
 using Transactions.Application.Services.BankTransactionParserFactory;
-using Transactions.Contracts.Interfaces;
 
 namespace Transactions.Application.Extensions;
 

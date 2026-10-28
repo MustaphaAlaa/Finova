@@ -1,5 +1,6 @@
 using System.Globalization;
-using Transactions.Contracts.Entities;
+using Transaction.Contracts.Entity;
+using Transaction.Contracts.Interfaces;
 
 namespace Transactions.Application.Services.BankTransactionParserFactory;
 

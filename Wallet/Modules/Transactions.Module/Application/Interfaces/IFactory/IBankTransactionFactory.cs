@@ -1,4 +1,4 @@
-using Transactions.Contracts.Entities;
+using Transaction.Contracts.Interfaces;
 
 namespace Transactions.Application.Interfaces.IFactory;
 

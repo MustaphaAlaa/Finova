@@ -1,4 +1,4 @@
-namespace Transactions.Contracts.Entities;
+namespace Transaction.Contracts.Entities;
 
 public class TransactionsRequest
 {

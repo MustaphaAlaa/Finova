@@ -3,13 +3,14 @@ using System.Text.Json;
 using Banks.Contracts.Entities;
 using Banks.Contracts.Enums;
 using Microsoft.Extensions.Logging;
+using Transaction.Contracts;
+using Transaction.Contracts.Entity;
 using Transaction.Contracts.Enums;
+using Transaction.Contracts.Interfaces;
+using Transactions.Application.Interfaces.IValidations;
 using Transactions.Application.Services.BankTransactionParserFactory;
-using Transactions.Contracts.Entities;
-using Transactions.Contracts.Interfaces;
-using Transactions.Infrastructe;
 
-namespace Transaction.Application.Services;
+namespace Transactions.Application.Services;
 
 public class TransactionServices(
     IBankTransactionStager stager,

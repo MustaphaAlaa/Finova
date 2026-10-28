@@ -1,24 +1,18 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
-using Banks.Contracts.Entities;
 
+namespace Transaction.Contracts.Entities;
 
-namespace Transactions.Contracts.Entities;
-
-
-public class BankTransaction
+[Table("bank_transaction_stage")]
+public class BankTransactionStaging
 {
     public Guid Id { get; set; }
+    public Guid WebhookDeliveryId { get; set; }
     public Guid TransactionId { get; set; }
 
-    [ForeignKey("BankAccount")]
-    [Description("Bank Account Sends The Money")]
     public Guid Source { get; set; }
-    public Guid WebhookDeliveryId { get; set; }
 
-    [ForeignKey("BankAccount")]
-    [Description("Bank Account Receive The Money")]
     public Guid Destination { get; set; }
     public Currencies Currency { get; set; }
 
@@ -27,8 +21,15 @@ public class BankTransaction
 
     public DateTime Date { get; set; }
 
+    public DateTime StagedAtUtc { get; set; }
+
+    public DateTime? InsertedAtUtc { get; set; }
     public Guid BankId { get; set; }
 
+    public byte Status { get; set; }
+    [Description("0 = Pending, 1 = Processed")]
+
     [Column(TypeName = "jsonb")] public JsonDocument? Metadata { get; set; }
+
 }
 

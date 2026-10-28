@@ -1,4 +1,6 @@
-namespace Transactions.Contracts.Entities;
+using Transaction.Contracts.Entities;
+
+namespace Transaction.Contracts.Interfaces;
 
 public interface ITransactionStringParser
 {

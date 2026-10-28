@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using Transactions.Contracts.Entities;
+using Transaction.Contracts.Entities;
+
+namespace Transaction.Infrastructure;
 
 public class TransactionsDbContext(DbContextOptions<TransactionsDbContext> options)
     : DbContext(options)
@@ -18,17 +20,17 @@ public class TransactionsDbContext(DbContextOptions<TransactionsDbContext> optio
         builder.HasDefaultSchema("transactions");
         
         builder.Entity<TransacitonProcessingRecord>()
-        .HasKey(x=>x.Id);
+            .HasKey(x=>x.Id);
         builder.Entity<TransacitonProcessingRecord>()
-        .HasIndex(x => x.TransactionId)
-        .IsUnique();
+            .HasIndex(x => x.TransactionId)
+            .IsUnique();
          
         builder.Entity<MessageProcessingRecord>()
-  .HasKey(x=>x.Id);
+            .HasKey(x=>x.Id);
          
         builder.Entity<MessageProcessingRecord>()
-        .HasIndex(x => x.MessageId)
-        .IsUnique();
+            .HasIndex(x => x.MessageId)
+            .IsUnique();
 
         builder.ApplyConfigurationsFromAssembly(typeof(TransactionsDbContext).Assembly);
     }

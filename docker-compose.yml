@@ -1,34 +1,40 @@
 services:
 
-  # redis:
-  #   image: redis:7.4.11-alpine
-  #   container_name: redis
-  #   restart: always
-  #   ports:
-  #     - "6379:6379"
-  #   volumes:
-  #     - finova_redis_cache:/data
-  #   command: redis-server --appendonly yes
-  #   healthcheck:
-  #     test: ["CMD", "redis-cli", "ping"]
-  #     interval: 5s
-  #     timeout: 3s
-  #     retries: 5
-  #   networks:
-  #     - finova-net
+  redis:
+    image: redis:7.4.11-alpine
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - finova_redis_cache:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - finova-net
 
-  # redis-insight:
-  #   image: redis/redisinsight:latest
-  #   container_name: redis-insight
-  #   restart: always
-  #   ports:
-  #     - "5540:5540"
-  #   depends_on:
-  #     redis:
-  #       condition: service_healthy
-  #   networks:
-  #     - finova-net
-
+  redis-insight:
+    image: redis/redisinsight:latest
+    container_name: redis-insight
+    restart: always
+    ports:
+      - "5540:5540"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - finova-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5540/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+      
   rabbitmq:
     image: rabbitmq:4-management
     container_name: finova-rabbitmq
@@ -81,6 +87,8 @@ services:
     depends_on:
       finova-database:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     volumes:
       - ./Wallet/:/src/finova-wallet
     networks:
@@ -89,6 +97,7 @@ services:
       - "8080:8080"
     environment:
       ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Redis: redis:6379
       ConnectionStrings__finovaWalletDb: Host=finova-database;Database=FinovaDb;Username=finovaAdmin;Password=0000;SSL Mode=Prefer;Include Error Detail=true;
     stdin_open: true
     tty: true

@@ -1,9 +1,9 @@
 using Npgsql;
 using NpgsqlTypes;
-using Transactions.Contracts.Entities;
-using Transactions.Contracts.Interfaces;
+using Transaction.Contracts.Entities;
+using Transaction.Contracts.Interfaces;
 
-namespace Transactions.Infrastructe.EntitiesConfigurations;
+namespace Transaction.Infrastructure;
 
 public sealed class BankTransactionStager(NpgsqlDataSource dataSource) : IBankTransactionStager
 {

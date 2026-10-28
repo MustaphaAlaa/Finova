@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Npgsql;
-using Transactions.Contracts.Interfaces;
+using Transaction.Contracts.Interfaces;
 
-namespace Transactions.Infrastructe.EntitiesConfigurations;
+namespace Transaction.Infrastructure;
 
 
 public sealed class BankTransactionStageFlusher(

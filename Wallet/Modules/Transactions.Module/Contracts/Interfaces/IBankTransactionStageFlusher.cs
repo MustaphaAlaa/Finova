@@ -1,4 +1,4 @@
-namespace Transactions.Contracts.Interfaces;
+namespace Transaction.Contracts.Interfaces;
 
 public interface IBankTransactionStageFlusher
 {

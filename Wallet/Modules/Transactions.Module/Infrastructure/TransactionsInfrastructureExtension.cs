@@ -1,13 +1,12 @@
-using Banks.Contracts.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Npgsql;
-using Transactions.Contracts.Interfaces;
-using Transactions.Infrastructe;
-using Transactions.Infrastructe.EntitiesConfigurations;
+using Transaction.Contracts;
+using Transaction.Contracts.Interfaces;
+using Transaction.Infrastructure.Repositories;
 
-namespace Transactions.Infrastructure.Extensions;
+namespace Transaction.Infrastructure;
 
 public static class TransactionsInfrastructureExtension
 {

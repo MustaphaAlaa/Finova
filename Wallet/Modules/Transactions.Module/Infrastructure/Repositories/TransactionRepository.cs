@@ -1,13 +1,13 @@
 using System.Collections.Concurrent;
 using Banks.Contracts.Entities;
-using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using NpgsqlTypes;
 using Shared.Infrastructure.Repositories;
+using Transaction.Contracts;
+using Transaction.Contracts.Entities;
 using Transaction.Contracts.Enums;
-using Transactions.Contracts.Entities;
 
-namespace Transactions.Infrastructe;
+namespace Transaction.Infrastructure.Repositories;
 
 public sealed class TransactionRepository(
     NpgsqlDataSource dataSource,

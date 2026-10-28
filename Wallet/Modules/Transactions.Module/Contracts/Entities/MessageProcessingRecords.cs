@@ -1,13 +1,13 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using Transaction.Contracts.Enums;
 
-namespace Transactions.Contracts.Entities;
+namespace Transaction.Contracts.Entities;
 
-public class TransacitonProcessingRecord
+public class MessageProcessingRecord
 {
     [Key]
     public Guid Id { get; set; }
-    public Guid TransactionId { get; set; }
+    public Guid MessageId { get; set; }
     public string? Reason { get; set; }
     public DateTime ProcessedAtUtc { get; set; }
     public TransactionMessageProcessingStatus Status { get; set; }

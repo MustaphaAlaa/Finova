@@ -1,4 +1,6 @@
-using Transactions.Contracts.Entities;
+using Transaction.Contracts.Entities;
+
+namespace Transaction.Contracts.Interfaces;
 
 public interface IMessageProcessingRecordWriter
 {
@@ -12,7 +14,7 @@ public class MessageProcessingRecordWriter : IMessageProcessingRecordWriter
     public Task RecordAsync(MessageProcessingRecord messageProcessingRecord, CancellationToken cancellationToken)
     {
         // throw new NotImplementedException();
-      System.Console.WriteLine($"{messageProcessingRecord.MessageId} is wriiten");
-      return  Task.CompletedTask;
+        System.Console.WriteLine($"{messageProcessingRecord.MessageId} is wriiten");
+        return  Task.CompletedTask;
     }
 }

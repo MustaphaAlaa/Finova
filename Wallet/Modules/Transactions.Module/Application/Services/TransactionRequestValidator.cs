@@ -1,10 +1,12 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Linq.Expressions;
 using Banks.Contracts.Entities;
 using Microsoft.Extensions.Logging;
+using Transaction.Contracts;
+using Transaction.Contracts.Entity;
 using Transaction.Contracts.Enums;
-using Transactions.Contracts.Entities;
-using Transactions.Infrastructe;
+using Transactions.Application.Interfaces.IValidations;
 
 namespace Transactions.Application.Services;
 
@@ -48,19 +50,20 @@ public class TransactionServicesValidator(
     )
     {
         ArgumentNullException.ThrowIfNull(requests);
+        var stopwatch = Stopwatch.StartNew();
 
         var validRequests = new ConcurrentBag<TransactionsRequest>();
         var failedRecords = new ConcurrentBag<TransacitonProcessingRecord>();
 
-        Parallel.ForEach ( requests,
+        Parallel.ForEach(requests,
         new ParallelOptions
         {
-            CancellationToken=  cancellationToken,
+            CancellationToken = cancellationToken,
             MaxDegreeOfParallelism = 3
         }
         , (request) =>
         {
-           
+
             try
             {
                 ValidateTransactionRequest(request);
@@ -77,8 +80,43 @@ public class TransactionServicesValidator(
                         Status = TransactionMessageProcessingStatus.Rejected,
                     }
                 );
-            } 
+            }
         });
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+
+        stopwatch.Stop();
+
+        var totalCount = requests.Count;
+        var acceptedCount = validRequests.Count;
+        var rejectedCount = failedRecords.Count;
+
+        if (rejectedCount > 0)
+        {
+            logger.LogWarning(
+                "Transaction validation completed with rejections. " +
+                "Total: {TotalCount}, Accepted: {AcceptedCount}, " +
+                "Rejected: {RejectedCount}, DurationMs: {DurationMs}.",
+                totalCount,
+                acceptedCount,
+                rejectedCount,
+                stopwatch.ElapsedMilliseconds);
+        }
+        else
+        {
+            logger.LogInformation(
+                "Transaction validation completed successfully. " +
+                "Total: {TotalCount}, Accepted: {AcceptedCount}, " +
+                "Rejected: {RejectedCount}, DurationMs: {DurationMs}.",
+                totalCount,
+                acceptedCount,
+                rejectedCount,
+                stopwatch.ElapsedMilliseconds);
+        }
+
+
+
 
         if (failedRecords.Count > 0)
         {
@@ -97,11 +135,13 @@ public class TransactionServicesValidator(
             {
                 logger.LogError(
                     ex,
-                    "Failed to persist {Count} transaction processing records.",
-                    failedRecords.Count
-                );
+                    "Failed to persist rejected transaction processing " +
+                    "records. RejectedCount: {RejectedCount}.",
+                    rejectedCount);
+
                 throw;
             }
+
         }
 
         return validRequests;

@@ -1,10 +1,10 @@
 using System.Collections.Concurrent;
 using Banks.Contracts.Entities;
-using Finova.Shared.Infrastructure.Interfaces;
+using Shared.Infrastructure.Interfacse.IRepositrories;
+using Transaction.Contracts.Entities;
 using Transaction.Contracts.Enums;
-using Transactions.Contracts.Entities;
 
-namespace Transactions.Infrastructe;
+namespace Transaction.Contracts;
 
 public interface ITransactionRepository : IBaseRepository<BankTransaction>
 {

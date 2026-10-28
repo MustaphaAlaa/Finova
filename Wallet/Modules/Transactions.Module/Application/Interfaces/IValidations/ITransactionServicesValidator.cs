@@ -1,5 +1,7 @@
 using System.Collections.Concurrent;
-using Transactions.Contracts.Entities;
+using Transaction.Contracts.Entity;
+
+namespace Transactions.Application.Interfaces.IValidations;
 
 public interface ITransactionServicesValidator
 {

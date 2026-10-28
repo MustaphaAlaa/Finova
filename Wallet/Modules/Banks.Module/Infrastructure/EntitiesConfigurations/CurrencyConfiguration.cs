@@ -2,7 +2,7 @@ using Banks.Contracts.Entities;
 using Banks.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Transaction.Contracts.Entity;
+using Transaction.Contracts.Entities;
 
 namespace Banks.Infrastructure.EntitiesConfigurations;
 

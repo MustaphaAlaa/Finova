@@ -1,5 +1,5 @@
+using Transaction.Contracts.Interfaces;
 using Transactions.Application.Interfaces.IFactory;
-using Transactions.Contracts.Entities;
 
 namespace Transactions.Application.Services.BankTransactionParserFactory;
 
