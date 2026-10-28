@@ -51,7 +51,9 @@ public sealed class MessagePublisher(
                     },
                     async (message, ct) =>
                     {
+                        
                         await bus.Publish(message, ct);
+                        logger.LogInformation($"A message with Id: {message.Id} - has published");
                     }
                 );
             }

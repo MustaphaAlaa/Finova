@@ -4,7 +4,7 @@ using Banks.Contracts.Entities;
 using Banks.Contracts.Enums;
 using Microsoft.Extensions.Logging;
 using Transaction.Contracts;
-using Transaction.Contracts.Entity;
+using Transaction.Contracts.Entities;
 using Transaction.Contracts.Enums;
 using Transaction.Contracts.Interfaces;
 using Transactions.Application.Interfaces.IValidations;

@@ -1,6 +1,6 @@
 using System.Globalization;
 using System.Text.Json;
-using Transaction.Contracts.Entity;
+using Transaction.Contracts.Entities;
 using Transaction.Contracts.Interfaces;
 
 namespace Transactions.Application.Services.BankTransactionParserFactory;

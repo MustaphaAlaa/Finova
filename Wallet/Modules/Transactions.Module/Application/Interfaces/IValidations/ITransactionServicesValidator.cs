@@ -1,5 +1,5 @@
 using System.Collections.Concurrent;
-using Transaction.Contracts.Entity;
+using Transaction.Contracts.Entities;
 
 namespace Transactions.Application.Interfaces.IValidations;
 

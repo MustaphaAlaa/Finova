@@ -1,4 +1,4 @@
-using Transaction.Contracts.Entity;
+using Transaction.Contracts.Entities;
 using Transaction.Contracts.Interfaces;
 
 namespace Transactions.Application.Services.BankTransactionParserFactory;
