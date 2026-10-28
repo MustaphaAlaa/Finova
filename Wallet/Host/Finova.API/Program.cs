@@ -3,19 +3,20 @@ using Finova.API.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-builder.Services.AddHttpClient();
-builder.Services.AddControllers().AddApplicationPart(typeof(BankController).Assembly);
-builder.Services.AddHealthChecks().AddRedis(builder.Configuration.GetConnectionString("Redis"));
 
-builder.WebHost.ConfigureKestrel(options =>
-{
-    options.Limits.MaxRequestBodySize = 2 * 1024 * 1024;
-});
+builder.Services.AddHttpClient();
+
+builder.Services.AddControllers()
+    .AddApplicationPart(typeof(BankController).Assembly);
+
+builder.Services.AddHealthChecks()
+    .AddRedis(builder.Configuration.GetConnectionString("Redis"));
+
+builder.WebHost.ConfigureKestrel(options => { options.Limits.MaxRequestBodySize = 2 * 1024 * 1024; });
 
 builder.Services.AddFinovaServices(builder.Configuration);
+
 
 var app = builder.Build();
 

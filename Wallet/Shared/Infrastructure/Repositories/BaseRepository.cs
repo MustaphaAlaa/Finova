@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
-using Finova.Shared.Infrastructure.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Shared.Infrastructure.Interfacse.IRepositrories;
 
 namespace Shared.Infrastructure.Repositories;
 

@@ -1,8 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
-using Shared.Infrastructure.Extensions;
-using Shared.Services.Interfaces;
+using Shared.Exceptions;
+using Shared.Interfaces.IServices;
+using Shared.Services;
 
-namespace Finova.Shared.Extensions;
+namespace Shared.Extensions;
 
 public static class SharedExtensions
 {
@@ -12,6 +13,9 @@ public static class SharedExtensions
     )
     {
         services.AddSharedInfrastructure(connectionString);
+
         services.AddScoped<IRequestUtilities, RequestUtilities>();
+
+        services.AddExceptionHandler<InternalConfigurationExceptionHandler>();
     }
 };

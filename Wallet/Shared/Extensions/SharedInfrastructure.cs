@@ -1,10 +1,6 @@
-using IdentityModule.Domain;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Shared.Infrastructure.Extensions;
+namespace Shared.Extensions;
 
 internal static class SharedInfrastructure
 {

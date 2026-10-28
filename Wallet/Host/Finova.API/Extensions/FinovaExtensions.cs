@@ -1,40 +1,76 @@
 using Banks.Application.Extensions;
 using Banks.Infrastructure.Extensions;
-using Finova.Shared.Extensions;
-using IdentityModule.Infrastructure.Extensions;
+using Identity.Infrastructure;
+using Shared.Extensions;
 using StackExchange.Redis;
-using Transactions.Infrastructure.Extensions;
+using Transaction.Infrastructure;
+using Transactions.Application.Extensions;
 
 namespace Finova.API.Extensions;
+//
+// public static partial class FinovaExtensions
+// {
+//     public static IServiceCollection AddFinovaServices(
+//         this IServiceCollection services,
+//         IConfiguration configuration
+//     ) 
+//        
+//         using var loggerFactory = LoggerFactory.Create(builder =>
+//         {
+//             builder.AddConfiguration(configuration.GetSection("Logging"));
+//             builder.AddConsole();
+//             builder.AddDebug();
+//         });
+//
+//         AddFinovaPolicies(services);
+//
+//         return services;
+//     } 
+// }
+
+
+
+
+
 
 public static partial class FinovaExtensions
 {
     public static IServiceCollection AddFinovaServices(
         this IServiceCollection services,
-        IConfiguration configuration
-    )
+        IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("finovaWalletDb");
-        if (string.IsNullOrWhiteSpace(connectionString))
-        {
-            throw new InvalidOperationException(
-                "Connection string 'finovaWalletDb' is required to apply database migrations."
-            );
-        }
+        var connectionString = GetRequiredConnectionString(
+            configuration,
+            "finovaWalletDb");
 
-        services.AddSingleton<IConnectionMultiplexer>(sp =>
-        {
-            var config = configuration.GetConnectionString("Redis");
+        var redisConnectionString = GetRequiredConnectionString(
+            configuration,
+            "Redis");
 
-            return ConnectionMultiplexer.Connect(config!);
+        AddRedisServices(services, redisConnectionString);
+        AddModuleServices(services, connectionString);
+        AddFinovaPolicies(services);
+
+        return services;
+    }
+
+    private static void AddRedisServices(
+        IServiceCollection services,
+        string redisConnectionString)
+    {
+        services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(redisConnectionString));
+
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = redisConnectionString;
+            options.InstanceName = "finovaIdempotency:";
         });
+    }
 
-        services.AddStackExchangeRedisCache(opt =>
-        {
-            opt.Configuration = configuration.GetConnectionString("Redis");
-            opt.InstanceName = "finovaIdempotecny";
-        });
-
+    private static void AddModuleServices(
+        IServiceCollection services,
+        string connectionString)
+    {
         services.AddIdentityModuleInfrastructure(connectionString);
         services.AddSharedExtensions(connectionString);
 
@@ -42,26 +78,33 @@ public static partial class FinovaExtensions
         services.AddBanksApplicationServices();
 
         services.AddTransactionsInfrastructure(connectionString);
+        services.AddTransactionsApplicationServices();
+    }
 
-        using var loggerFactory = LoggerFactory.Create(builder =>
-        {
-            builder.AddConfiguration(configuration.GetSection("Logging"));
-            builder.AddConsole();
-            builder.AddDebug();
-        });
+    private static string GetRequiredConnectionString(
+        IConfiguration configuration,
+        string name)
+    {
+        string? connectionString = configuration.GetConnectionString(name);
 
-        AddFinovaPolicies(services);
+        if (string.IsNullOrWhiteSpace(connectionString))
+            throw new InvalidOperationException(
+                $"Connection string '{name}' is required.");
 
-        return services;
+        return connectionString;
     }
 
     public static async Task MigrateFinovaDatabasesAsync(
         this IServiceProvider servicesProvider,
-        CancellationToken cancellationToken = default
-    )
+        CancellationToken cancellationToken = default)
     {
-        await servicesProvider.MigrateBanksInfrastructureAsync(cancellationToken);
-        await servicesProvider.MigrateIdentityInfrastructureAsync(cancellationToken);
-        await servicesProvider.MigrateTransactionsInfrastructureAsync(cancellationToken);
+        await servicesProvider.MigrateBanksInfrastructureAsync(
+            cancellationToken);
+
+        await servicesProvider.MigrateIdentityInfrastructureAsync(
+            cancellationToken);
+
+        await servicesProvider.MigrateTransactionsInfrastructureAsync(
+            cancellationToken);
     }
 }

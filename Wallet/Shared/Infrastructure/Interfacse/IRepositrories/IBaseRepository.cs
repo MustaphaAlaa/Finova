@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 
-namespace Finova.Shared.Infrastructure.Interfaces;
+namespace Shared.Infrastructure.Interfacse.IRepositrories;
 
 public interface IBaseRepository<TEntity>
     where TEntity : class
