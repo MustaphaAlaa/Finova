@@ -1,7 +1,6 @@
 using Banks.Application.Interfaces.IRepositories;
 using Banks.Contracts.Entities;
 using Banks.Contracts.Enums;
-using Banks.Contrancts.Enums;
 using Banks.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Shared.Infrastructure.Repositories;
@@ -12,15 +11,15 @@ internal sealed class BankRepository(BanksDbContext dbContext)
     : BaseRepository<Bank, BanksDbContext>(dbContext),
         IBankRepository
 {
-    public async Task<Bank> GetBankByName(ContractedBanks bank)
+    public async Task<Bank> GetBankByNameAsync(ContractedBanks bank, CancellationToken cancellationToken = default)
     {
-        var res = await Db.Banks.SingleOrDefaultAsync(b => b.Name == bank);
+        var res = await Db.Banks.SingleOrDefaultAsync(b => b.Name == bank, cancellationToken);
         return res;
     }
 
-    public async Task<bool> IsContractedBank(Guid id)
+    public async Task<bool> IsContractedBank(Guid id, CancellationToken cancellationToken = default)
     {
-        var res = await Db.Banks.AnyAsync(b => b.Id == id && b.Contracted);
+        var res = await Db.Banks.AnyAsync(b => b.Id == id && b.Contracted, cancellationToken);
         return res;
     }
 
@@ -38,10 +37,7 @@ internal sealed class BankRepository(BanksDbContext dbContext)
         return await Db
             .InboundWebhookMessages.Where(msg => msg.Id == message.Id)
             .ExecuteUpdateAsync(
-                (msg) =>
-                {
-                    msg.SetProperty(m => m.Status, status);
-                },
+                (msg) => { msg.SetProperty(m => m.Status, status); },
                 cancellationToken
             );
     }

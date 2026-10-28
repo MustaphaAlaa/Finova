@@ -13,5 +13,6 @@ public class InboundWebhookMessageConfiguration : IEntityTypeConfiguration<Inbou
             .HasColumnType("jsonb");
         builder.HasIndex(msg => new { msg.ReceivedAtUtc, msg.Id })
             .HasFilter("\"Status\" = 0");
+        builder.HasIndex(msg => msg.WebhookDeliveryId).IsUnique();
     }
 }

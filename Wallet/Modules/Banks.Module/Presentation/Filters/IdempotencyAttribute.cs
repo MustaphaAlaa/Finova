@@ -2,8 +2,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.Caching.Distributed;
-using Shared.Services.Interfaces;
+using Shared.Interfaces.IServices;
 using StackExchange.Redis;
 
 namespace Banks.Presentation.Filters;
@@ -49,8 +48,7 @@ public class IdempotencyAttribute(IConnectionMultiplexer redis, IRequestUtilitie
         //     context.HttpContext.RequestAborted
         // );
 
-        var cacheResponseJson = await _database.StringGetAsync(redisKey);
-
+        var cacheResponseJson = await _database.StringGetAsync(redisKey); 
         // if (!string.IsNullOrWhiteSpace(cacheResponseJson))
         if (cacheResponseJson.HasValue)
         {

@@ -1,4 +1,4 @@
-using Banks.Application.Interfaces;
+using Banks.Application.Interfaces.IServices;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,7 +12,7 @@ public sealed class AuthorizeBankTransactionWebhookAttribute : Attribute, IFilte
     public IFilterMetadata CreateInstance(IServiceProvider serviceProvider)
     {
         var authWebhookFilter =
-            serviceProvider.GetRequiredService<IAuthorizeBankTransactionWebhookFilter>();
+            serviceProvider.GetRequiredService<IBankTransactionWebhookAuthorizationFilter>();
 
         return authWebhookFilter;
     }

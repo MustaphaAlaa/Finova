@@ -1,5 +1,5 @@
 using Banks.Contracts.Entities;
-using Banks.Contrancts.Enums;
+using Banks.Contracts.Enums;
 using Banks.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

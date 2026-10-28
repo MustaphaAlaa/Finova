@@ -88,7 +88,7 @@ class BankOutboxWriter(
         return affectedRows;
     }
 
-    public async Task<bool> IsWebhookDeliveryIdExistAsync(Guid webhookDeliveryId, CancellationToken ct = default)
+    public async Task<bool> ExistsByDeliveryIdAsync(Guid webhookDeliveryId, CancellationToken ct = default)
     {
         return await this.Db.InboundWebhookMessages.AnyAsync(msg => msg.WebhookDeliveryId == webhookDeliveryId, ct);
     }
