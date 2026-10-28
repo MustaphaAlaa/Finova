@@ -2,7 +2,6 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
 using Banks.Contracts.Enums;
-using Banks.Contrancts.Enums;
 
 namespace Banks.Contracts.Entities;
 

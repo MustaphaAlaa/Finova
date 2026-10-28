@@ -1,5 +1,5 @@
 using Banks.Contracts.Entities;
-using Finova.Shared.Infrastructure.Interfaces;
+using Shared.Infrastructure.Interfacse.IRepositrories;
 
 namespace Banks.Contracts.Interfaces;
 
@@ -13,6 +13,6 @@ public interface IBankOutboxWriter : IBaseRepository<InboundWebhookMessage>
     Task<int> RequeueStaleProcessingMessagesAsync(
         CancellationToken ct = default);
 
-    Task<bool> IsWebhookDeliveryIdExistAsync(Guid webhookDeliveryId, CancellationToken ct = default);
+    Task<bool> ExistsByDeliveryIdAsync(Guid webhookDeliveryId, CancellationToken ct = default);
     Task<int> SaveChangesAsync(CancellationToken ct = default);
 }

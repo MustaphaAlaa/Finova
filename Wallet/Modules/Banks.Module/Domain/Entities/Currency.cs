@@ -1,4 +1,5 @@
 using Banks.Contracts.Entities;
+using Transaction.Contracts.Entity;
 
 namespace Banks.Domain.Entities;
 

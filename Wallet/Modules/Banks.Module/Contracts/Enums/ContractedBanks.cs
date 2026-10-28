@@ -1,4 +1,4 @@
-namespace Banks.Contrancts.Enums;
+namespace Banks.Contracts.Enums;
 
 public enum ContractedBanks
 {

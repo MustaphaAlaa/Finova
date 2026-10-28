@@ -1,15 +1,15 @@
 using Banks.Contracts.Entities;
 using Banks.Contracts.Enums;
-using Banks.Contrancts.Enums;
 using Banks.Domain.Entities;
-using Finova.Shared.Infrastructure.Interfaces;
+using Shared.Infrastructure.Interfacse.IRepositrories;
 
 namespace Banks.Application.Interfaces.IRepositories;
 
 public interface IBankRepository : IBaseRepository<Bank>
 {
-    Task<Bank> GetBankByName(ContractedBanks bank);
-    Task<bool> IsContractedBank(Guid id);
+    Task<Bank> GetBankByNameAsync(ContractedBanks bank, CancellationToken cancellationToken = default);
+    Task<bool> IsContractedBank(Guid id, CancellationToken cancellationToken = default);
+
     Task<int> UpdateMessageStatusAsync(
         InboundWebhookMessage message,
         InboundTransactionWebhookOutboxMessageStatus status,

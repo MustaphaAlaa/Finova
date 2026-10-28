@@ -13,14 +13,14 @@ namespace Banks.Application.Services;
 public class BankServices(
     IBankRepository bankRepository,
     IBankOutboxWriter outboxWriter,
-    IBankTransactionWebhookValidator bankTransactionWebhookValidator,
+    IWebhookDeliveryValidator webhookDeliveryValidator,
     ILogger<BankServices> logger)
     : IBankServices
 {
     public async Task WriteToOutboxAsync(BankTransactionWebhookRequest request,
         CancellationToken ct)
     {
-        await bankTransactionWebhookValidator.ValidateAndEnsureNewDeliveryAsync(request, ct);
+        await webhookDeliveryValidator.ValidateNewDeliveryAsync(request, ct);
 
 
         var jsonStr = request.Payload.RootElement.GetRawText();
@@ -28,7 +28,7 @@ public class BankServices(
             Encoding.UTF8.GetByteCount(jsonStr);
 
 
-        var bank = await bankRepository.GetBankByName(request.BankCode);
+        var bank = await bankRepository.GetBankByNameAsync(request.BankCode);
 
 
         var msg = new InboundWebhookMessage
