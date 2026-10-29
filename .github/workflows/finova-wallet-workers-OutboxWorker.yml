@@ -27,6 +27,29 @@ permissions:
   contents: read
 
 jobs:
+
+  build-and-test:
+    name: Build and test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore Wallet/Finova.sln
+
+      - name: Build solution
+        run: dotnet build Wallet/Finova.sln --configuration Release --no-restore
+
+      - name: Run tests
+        run: dotnet test Wallet/Finova.sln --configuration Release --no-build
+
   build:
     name: Build OutboxWorker
     runs-on: ubuntu-latest

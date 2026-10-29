@@ -22,7 +22,8 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup> 
+    <ProjectReference Include="../../../Modules/Banks.Module/Contracts/Banks.Contracts.csproj" /> 
     <ProjectReference Include="..\..\..\Modules\Banks.Module\Application\Banks.Application.csproj" />
   </ItemGroup>
 
