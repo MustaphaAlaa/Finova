@@ -51,4 +51,4 @@ jobs:
         run: docker compose -f docker-compose.yml build
 
       - name: Build production Docker image
-        run: docker build --file DockerFiles/Dockerfile.prod --tag finova-wallet:ci Wallet
+        run: docker build --file Wallet/DockerFiles/Dockerfile.prod --tag finova-wallet:ci Wallet

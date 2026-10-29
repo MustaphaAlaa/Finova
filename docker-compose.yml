@@ -59,7 +59,7 @@ services:
     container_name: finova-outbox-worker-dev
     build:
       context: "./Wallet"
-      dockerfile: Host/Finova.Workers/OutboxWorker/DockerFiles/Dockerfile.OutboxWorker.dev
+      dockerfile: Host/Finova.Workers/OutboxWorker/Dockerfiles/Dockerfile.OutboxWorker.dev
     restart: always
     depends_on:
       finova-database:
@@ -82,7 +82,7 @@ services:
     container_name: finova-wallet-dev
     build:
       context: "./Wallet"
-      dockerfile: DockerFiles/Dockerfile.finova-wallet.dev
+      dockerfile: Dockerfiles/Dockerfile.finova-wallet.dev
     restart: always
     depends_on:
       finova-database:

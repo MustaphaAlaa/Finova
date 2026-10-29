@@ -70,7 +70,7 @@ jobs:
         run: dotnet build Wallet/Host/Finova.Workers/OutboxWorker/OutboxWorker.csproj --configuration Release --no-restore
 
       - name: Build production Docker image
-        run: docker build --file Wallet/Host/Finova.Workers/OutboxWorker/DockerFiles/Dockerfile.Prod --tag outbox-worker:ci Wallet
+        run: docker build --file Wallet/Host/Finova.Workers/OutboxWorker/Dockerfiles/Dockerfile.Prod --tag outbox-worker:ci Wallet
 
       - name: Build development Docker image
-        run: docker build --file Wallet/Host/Finova.Workers/OutboxWorker/DockerFiles/Dockerfile.OutboxWorker.dev --tag outbox-worker:dev Wallet
+        run: docker build --file Wallet/Host/Finova.Workers/OutboxWorker/Dockerfiles/Dockerfile.OutboxWorker.dev --tag outbox-worker:dev Wallet

@@ -5,6 +5,7 @@ WORKDIR /src
 
 # Copy project files for dependency restore
 COPY ["Host/Finova.API/Finova.API.csproj", "Host/Finova.API/"]
+ 
 
 COPY ["Host/Finova.Workers/OutboxWorker/OutboxWorker.csproj", "Host/Finova.Workers/OutboxWorker/"]
 
@@ -48,7 +49,8 @@ COPY ["Modules/Transactions.Module/Presentation/Transaction.Presentation.csproj"
 
 
 COPY ["Shared/Shared.csproj", "Shared/"]
-
+ 
+ 
 RUN dotnet restore "Host/Finova.API/Finova.API.csproj"
 
 # Copy source and publish
@@ -57,8 +59,7 @@ COPY Modules/ Modules/
 COPY Shared/ Shared/
 
 RUN dotnet publish "Host/Finova.API/Finova.API.csproj" \
-    -c Release \
-    --no-restore \
+    -c Release \ 
     -o /app/publish
 
 # Runtime stage
