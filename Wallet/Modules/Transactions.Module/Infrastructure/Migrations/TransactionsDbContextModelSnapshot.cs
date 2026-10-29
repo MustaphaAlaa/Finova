@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using Transaction.Infrastructure;
 
 #nullable disable
 
@@ -23,7 +24,7 @@ namespace Transaction.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Transactions.Contracts.Entities.BankTransaction", b =>
+            modelBuilder.Entity("Transaction.Contracts.Entities.BankTransaction", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -68,7 +69,7 @@ namespace Transaction.Infrastructure.Migrations
                     b.ToTable("BankTransactions", "transactions");
                 });
 
-            modelBuilder.Entity("Transactions.Contracts.Entities.BankTransactionStaging", b =>
+            modelBuilder.Entity("Transaction.Contracts.Entities.BankTransactionStaging", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -125,7 +126,7 @@ namespace Transaction.Infrastructure.Migrations
                     b.ToTable("bank_transaction_stage", "transactions");
                 });
 
-            modelBuilder.Entity("Transactions.Contracts.Entities.MessageProcessingRecord", b =>
+            modelBuilder.Entity("Transaction.Contracts.Entities.MessageProcessingRecord", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -151,7 +152,7 @@ namespace Transaction.Infrastructure.Migrations
                     b.ToTable("MessageProcessingRecords", "transactions");
                 });
 
-            modelBuilder.Entity("Transactions.Contracts.Entities.TransacitonProcessingRecord", b =>
+            modelBuilder.Entity("Transaction.Contracts.Entities.TransacitonProcessingRecord", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()

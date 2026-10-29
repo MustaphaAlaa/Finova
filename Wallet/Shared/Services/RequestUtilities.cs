@@ -5,7 +5,7 @@ using Shared.Interfaces.IServices;
 
 namespace Shared.Services;
 
-internal class RequestUtilities : IRequestUtilities
+public class RequestUtilities : IRequestUtilities
 {
     public string? GetRouteParameterValue(
         AuthorizationFilterContext context,

@@ -72,6 +72,9 @@ namespace Banks.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("WebhookDeliveryId")
+                        .IsUnique();
+
                     b.HasIndex("ReceivedAtUtc", "Id")
                         .HasFilter("\"Status\" = 0");
 
