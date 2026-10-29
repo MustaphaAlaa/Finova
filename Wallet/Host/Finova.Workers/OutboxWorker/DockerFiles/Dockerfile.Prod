@@ -1,0 +1,50 @@
+
+# Build stage
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+
+COPY ["Host/Finova.Workers/OutboxWorker/OutboxWorker.csproj", "Host/Finova.Workers/OutboxWorker/"]
+
+# Banks
+
+COPY ["Modules/Banks.Module/Application/Banks.Application.csproj", "Modules/Banks.Module/Application/"]
+
+COPY ["Modules/Banks.Module/Contracts/Banks.Contracts.csproj", "Modules/Banks.Module/Contracts/"]
+
+COPY ["Modules/Banks.Module/Domain/Banks.Domain.csproj", "Modules/Banks.Module/Domain/"]
+
+COPY ["Modules/Banks.Module/Infrastructure/Banks.Infrastructure.csproj", "Modules/Banks.Module/Infrastructure/"]
+
+# Identity
+
+COPY ["Modules/Identity.Module/Contracts/Identity.Contracts.csproj", "Modules/Identity.Module/Contracts/"]
+
+# Transactions
+COPY ["Modules/Transactions.Module/Contracts/Transactions.Contracts.csproj", "Modules/Transactions.Module/Contracts/"]
+
+COPY ["Modules/Transactions.Module/Infrastructure/Transactions.Infrastructure.csproj", "Modules/Transactions.Module/Infrastructure/"]
+
+# Shared
+
+COPY ["Shared/Shared.csproj", "Shared/"]
+
+RUN dotnet restore "Host/Finova.Workers/OutboxWorker/OutboxWorker.csproj"
+
+
+COPY ["Host/Finova.Workers/OutboxWorker/", "Host/Finova.Workers/OutboxWorker/"]
+
+COPY ["Modules/", "Modules/"]
+
+COPY ["Shared/", "Shared/"]
+
+RUN dotnet publish "Host/Finova.Workers/OutboxWorker/OutboxWorker.csproj" \
+    -c Release \
+    -o /app/publish
+
+# Runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+WORKDIR /app
+
+COPY --from=build /app/publish .
+
+ENTRYPOINT ["dotnet", "OutboxWorker.dll"]

@@ -1,0 +1,72 @@
+FROM mcr.microsoft.com/dotnet/sdk:10.0
+
+ENV PATH="$PATH:/root/.dotnet/tools"
+RUN dotnet tool install --global dotnet-ef --version 10.*
+
+WORKDIR /src/finova-wallet
+
+ COPY ["Host/Finova.API/Finova.API.csproj", "Host/Finova.API/"]
+COPY ["Host/Finova.Workers/OutboxWorker/OutboxWorker.csproj", "Host/Finova.Workers/OutboxWorker/"]
+
+COPY ["Modules/Banks.Module/Application/Banks.Application.csproj", "Modules/Banks.Module/Application/"]
+COPY ["Modules/Banks.Module/Contracts/Banks.Contracts.csproj", "Modules/Banks.Module/Contracts/"]
+COPY ["Modules/Banks.Module/Domain/Banks.Domain.csproj", "Modules/Banks.Module/Domain/"]
+COPY ["Modules/Banks.Module/Infrastructure/Banks.Infrastructure.csproj", "Modules/Banks.Module/Infrastructure/"]
+COPY ["Modules/Banks.Module/Presentation/Banks.Presentation.csproj", "Modules/Banks.Module/Presentation/"]
+
+COPY ["Modules/Identity.Module/Application/Identity.Application.csproj", "Modules/Identity.Module/Application/"]
+COPY ["Modules/Identity.Module/Contracts/Identity.Contracts.csproj", "Modules/Identity.Module/Contracts/"]
+COPY ["Modules/Identity.Module/Domain/Identity.Domain.csproj", "Modules/Identity.Module/Domain/"]
+COPY ["Modules/Identity.Module/Infrastructure/Identity.Infrastructure.csproj", "Modules/Identity.Module/Infrastructure/"]
+COPY ["Modules/Identity.Module/Presentation/Identity.Presentation.csproj", "Modules/Identity.Module/Presentation/"]
+
+COPY ["Modules/Transactions.Module/Application/Transactions.Application.csproj", "Modules/Transactions.Module/Application/"]
+COPY ["Modules/Transactions.Module/Contracts/Transactions.Contracts.csproj", "Modules/Transactions.Module/Contracts/"]
+COPY ["Modules/Transactions.Module/Domain/Transactions.Domain.csproj", "Modules/Transactions.Module/Domain/"]
+COPY ["Modules/Transactions.Module/Infrastructure/Transactions.Infrastructure.csproj", "Modules/Transactions.Module/Infrastructure/"]
+COPY ["Modules/Transactions.Module/Presentation/Transaction.Presentation.csproj", "Modules/Transactions.Module/Presentation/"]
+
+# IntegrationsTests
+
+COPY ["Tests/Integrations/Banks.Module.IntegrationTests/Banks.Module.IntegrationTests.csproj", "Tests/Integrations/Banks.Module.IntegrationTests/"]
+
+COPY ["Tests/Integrations/Transactions.Module.IntegrationTests/Transactions.Module.IntegrationTests.csproj", "Tests/Integrations/Transactions.Module.IntegrationTests/"]
+
+COPY ["Tests/Integrations/Finova.API.IntegrationTests/Finova.API.IntegrationTests.csproj", "Tests/Integrations/Finova.API.IntegrationTests/"]
+
+COPY ["Tests/Integrations/OutboxWorker.IntegrationTests/OutboxWorker.IntegrationTests.csproj", "Tests/Integrations/OutboxWorker.IntegrationTests/"]
+
+COPY ["Tests/Integrations/Shared.IntegrationTests/Shared.IntegrationTests.csproj", "Tests/Integrations/Shared.IntegrationTests/"]
+
+# UnitTests
+
+COPY ["Tests/UnitTesting/Identity.Module.UnitTests/Identity.Module.UnitTests.csproj", "Tests/UnitTesting/Identity.Module.UnitTests/"]
+
+COPY ["Tests/UnitTesting/Banks.Module.UnitTests/Banks.Module.UnitTests.csproj", "Tests/UnitTesting/Banks.Module.UnitTests/"]
+
+COPY ["Tests/UnitTesting/Shared.UnitTests/Shared.UnitTests.csproj", "Tests/UnitTesting/Shared.UnitTests/"]
+
+COPY ["Tests/UnitTesting/Transactions.Module.UnitTests/Transactions.Module.UnitTests.csproj", "Tests/UnitTesting/Transactions.Module.UnitTests/"]
+
+COPY ["Tests/UnitTesting/OutboxWorker.UnitTests/OutboxWorker.UnitTests.csproj", "Tests/UnitTesting/OutboxWorker.UnitTests/"]
+
+ 
+
+
+COPY ["Shared/Shared.csproj", "Shared/"]
+COPY ["Finova.sln", "./"]
+
+RUN dotnet restore Finova.sln
+
+# Source (overridden by the bind mount in dev, but keeps the image runnable on its own)
+COPY Host/ Host/
+COPY Modules/ Modules/
+COPY Shared/ Shared/
+COPY Tests/ Tests/
+
+ENV DOTNET_USE_POLLING_FILE_WATCHER=true
+ENV ASPNETCORE_ENVIRONMENT=Development
+
+EXPOSE 8080
+
+CMD ["dotnet", "watch", "run", "--project", "Host/Finova.API/Finova.API.csproj", "--no-launch-profile", "--urls", "http://+:8080"]

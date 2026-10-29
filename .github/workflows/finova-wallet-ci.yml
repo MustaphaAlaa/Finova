@@ -1,0 +1,53 @@
+name: finova-wallet-ci
+
+on:
+  push:
+    paths:
+      - '!**/*.md'
+      - '!**/*.txt'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build and test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore Wallet/Finova.sln
+
+      - name: Build solution
+        run: dotnet build Wallet/Finova.sln --configuration Release --no-restore
+
+      - name: Run tests
+        run: dotnet test Wallet/Finova.sln --configuration Release --no-build
+
+  docker-build:
+    name: Build Docker images
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Validate Docker Compose
+        run: docker compose -f Wallet/docker-compose.yml config --quiet
+
+      - name: Build Docker Compose images
+        run: docker compose -f Wallet/docker-compose.yml build
+
+      - name: Build production Docker image
+        run: docker build --file Wallet/DockerFiles/Dockerfile.prod --tag finova-wallet:ci Wallet

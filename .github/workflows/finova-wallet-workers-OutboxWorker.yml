@@ -1,0 +1,53 @@
+name: finova-wallet-workers-OutboxWorker
+
+on:
+  push:
+    paths:
+      - "Wallet/Host/Finova.Workers/OutboxWorker/**"
+      - "Wallet/Modules/Banks.Module/**"
+      - "Wallet/Modules/Transactions.Module/**"
+      - "Wallet/Modules/Identity.Module/Contracts/**"
+      - "Wallet/Shared/**"
+      - "!**/*.md"
+      - "!**/*.txt"
+      - ".github/workflows/outbox-worker.yml"
+  pull_request:
+    paths:
+      - "Wallet/Host/Finova.Workers/OutboxWorker/**"
+      - "Wallet/Modules/Banks.Module/**"
+      - "Wallet/Modules/Transactions.Module/**"
+      - "Wallet/Modules/Identity.Module/Contracts/**"
+      - "Wallet/Shared/**"
+      - "!**/*.md"
+      - "!**/*.txt" 
+      - ".github/workflows/outbox-worker.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build OutboxWorker
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore Wallet/Host/Finova.Workers/OutboxWorker/OutboxWorker.csproj
+
+      - name: Build OutboxWorker
+        run: dotnet build Wallet/Host/Finova.Workers/OutboxWorker/OutboxWorker.csproj --configuration Release --no-restore
+
+      - name: Build production Docker image
+        run: docker build --file Wallet/Host/Finova.Workers/OutboxWorker/DockerFiles/Dockerfile.Prod --tag outbox-worker:ci Wallet
+
+      - name: Build development Docker image
+        run: docker build --file Wallet/Host/Finova.Workers/OutboxWorker/DockerFiles/Dockerfile.OutboxWorker.dev --tag outbox-worker:dev Wallet
