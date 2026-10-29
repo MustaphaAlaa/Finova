@@ -1,13 +1,13 @@
+using Transaction.Contracts.Interfaces;
 
-using Transactions.Contracts.Interfaces;
-
-namespace  OutboxWorker.Workers;
+namespace OutboxWorker.Workers;
 
 public sealed class BankTransactionStageFlusherWorker(
-                     IServiceScopeFactory scopeFactory,
+    IServiceScopeFactory scopeFactory,
     ILogger<BankTransactionStageFlusherWorker> logger) : BackgroundService
 {
     private const int BatchSize = 5_000;
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         using var timer = new PeriodicTimer(TimeSpan.FromSeconds(5));
@@ -20,15 +20,14 @@ public sealed class BankTransactionStageFlusherWorker(
                 var flusherWorker = scope.ServiceProvider
                     .GetRequiredService<IBankTransactionStageFlusher>();
                 // Drain: keep going while full batches are available
-                while (await flusherWorker.FlushOnceAsync(stoppingToken) == BatchSize) { }
+                while (await flusherWorker.FlushOnceAsync(stoppingToken) == BatchSize)
+                {
+                }
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 logger.LogError(ex, "Stage flush failed; will retry on next tick");
             }
-        }
-        while (await timer.WaitForNextTickAsync(stoppingToken));
+        } while (await timer.WaitForNextTickAsync(stoppingToken));
     }
-
-
 }

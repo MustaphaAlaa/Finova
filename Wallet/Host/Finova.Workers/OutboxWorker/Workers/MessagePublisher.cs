@@ -1,10 +1,8 @@
 using System.Collections.Concurrent;
-using System.Text.Json;
 using Banks.Contracts.Entities;
 using Banks.Contracts.Interfaces;
 using MassTransit;
 using Microsoft.Extensions.Options;
-using Transactions.Contracts.Interfaces;
 
 namespace OutboxWorker.Workers;
 
@@ -46,12 +44,10 @@ public sealed class MessagePublisher(
                     claimedBag,
                     new ParallelOptions
                     {
-                        MaxDegreeOfParallelism = _opt.MaxConcurrency,
-                        CancellationToken = stoppingToken,
+                        MaxDegreeOfParallelism = _opt.MaxConcurrency, CancellationToken = stoppingToken,
                     },
                     async (message, ct) =>
                     {
-                        
                         await bus.Publish(message, ct);
                         logger.LogInformation($"A message with Id: {message.Id} - has published");
                     }

@@ -1,8 +1,9 @@
 using Banks.Infrastructure.Extensions;
 using MassTransit;
 using OutboxWorker.Workers;
-using Transactions.Application.Extensions;
-using Transactions.Infrastructure.Extensions;
+using Transaction.Contracts.Interfaces;
+using Transaction.Infrastructure;
+using Transactions.Application.Extensions; 
 
 var builder = Host.CreateApplicationBuilder(args);
 

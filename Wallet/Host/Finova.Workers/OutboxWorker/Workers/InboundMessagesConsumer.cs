@@ -1,7 +1,7 @@
 using Banks.Application.Interfaces.IRepositories;
 using Banks.Contracts.Entities;
 using MassTransit;
-using Transactions.Contracts.Interfaces;
+using Transaction.Contracts.Interfaces; 
 
 namespace OutboxWorker.Workers;
 
