@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Shared.Interfaces.IServices;
 
@@ -32,7 +33,8 @@ public class WebhookRequestAuthenticatorTests
             .Customize(new AutoMoqCustomization());
 
         var requestUtilities = fixture.Freeze<Mock<IRequestUtilities>>();
-        var logger = fixture.Freeze<Mock<ILogger<WebhookRequestAuthenticator>>>();
+
+        var logger = NullLogger<WebhookRequestAuthenticator>.Instance;
 
         var configurationValues = new Dictionary<string, string?>
         {
@@ -75,7 +77,7 @@ public class WebhookRequestAuthenticatorTests
         var sut = new WebhookRequestAuthenticator(
             configuration,
             requestUtilities.Object,
-            logger.Object);
+            logger);
 
         return new TestHarness(
             sut,
@@ -108,7 +110,7 @@ public class WebhookRequestAuthenticatorTests
         WebhookRequestAuthenticator Sut,
         AuthorizationFilterContext Context,
         Mock<IRequestUtilities> RequestUtilities,
-        Mock<ILogger<WebhookRequestAuthenticator>> Logger);
+         ILogger<WebhookRequestAuthenticator> Logger);
 
     // Successful requests
 
@@ -302,7 +304,7 @@ public class WebhookRequestAuthenticatorTests
             "Missing or invalid timestamp header.");
     }
 
-    [Theory] 
+    [Theory]
     [InlineData(long.MinValue)]
     public void TryPrepareWebhookSignatureValidation_WhenTimestampExceedsUnixRange_ReturnsBadRequest(
         long timestamp)
@@ -316,7 +318,7 @@ public class WebhookRequestAuthenticatorTests
         result.Should().BeFalse();
 
         GetBadRequest(harness.Context).Value.Should().Be(
-            "Missing or invalid timestamp header."); 
+            "Missing or invalid timestamp header.");
     }
 
     [Fact]

@@ -7,30 +7,6 @@ using Transaction.Infrastructure;
 using Transactions.Application.Extensions;
 
 namespace Finova.API.Extensions;
-//
-// public static partial class FinovaExtensions
-// {
-//     public static IServiceCollection AddFinovaServices(
-//         this IServiceCollection services,
-//         IConfiguration configuration
-//     ) 
-//        
-//         using var loggerFactory = LoggerFactory.Create(builder =>
-//         {
-//             builder.AddConfiguration(configuration.GetSection("Logging"));
-//             builder.AddConsole();
-//             builder.AddDebug();
-//         });
-//
-//         AddFinovaPolicies(services);
-//
-//         return services;
-//     } 
-// }
-
-
-
-
 
 
 public static partial class FinovaExtensions

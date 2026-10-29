@@ -66,7 +66,7 @@ public class InternalConfigurationExceptionHandlerTests
 
         problem.Should().NotBeNull();
         problem!.Title.Should().Be(
-            "An unexpected error occurred, we're working to solve this problem.");
+            "An unexpected error occurred, we're working to solve this porblem.");
     }
 
     [Fact]

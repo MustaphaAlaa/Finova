@@ -1,11 +1,14 @@
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Routing;
 using Shared.Interfaces.IServices;
 
+[assembly: InternalsVisibleTo("Shared.UnitTests")]
 namespace Shared.Services;
 
-public class RequestUtilities : IRequestUtilities
+internal class RequestUtilities : IRequestUtilities
 {
     public string? GetRouteParameterValue(
         AuthorizationFilterContext context,

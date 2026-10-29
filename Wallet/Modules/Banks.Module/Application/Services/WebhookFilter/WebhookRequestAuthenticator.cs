@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Net;
+using System.Runtime.CompilerServices;
 using Banks.Application.Builders;
 using Banks.Application.Dtos;
 using Banks.Application.Interfaces.IServices;
@@ -7,14 +8,16 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
+using Shared.Exceptions;
 using Shared.Interfaces.IServices;
 
+[assembly: InternalsVisibleTo("Banks.Module.UnitTests")]
 namespace Banks.Application.Services.WebhookFilter;
 
 internal sealed class WebhookRequestAuthenticator(
     WebhookAuthenticationConfiguration webhookAuthenticationConfiguration,
     IRequestUtilities requestUtilities,
-    ILogger<BankWebhookAuthorizationService> logger
+    ILogger<WebhookRequestAuthenticator> logger
 ) : IWebhookRequestAuthenticator
 {
     private string _routeParameter;
@@ -154,9 +157,9 @@ internal sealed class WebhookRequestAuthenticator(
             {
                 context.Result = new BadRequestObjectResult(
                     "Timestamp is outside the allowed time window.");
-                
+
                 return false;
-            } 
+            }
 
 
             _webhookSignatureInputBuilder.SetTimestampBytes(
@@ -181,6 +184,10 @@ internal sealed class WebhookRequestAuthenticator(
             _webhookSignatureInputBuilder.SetSecretKeyBytes(secretKeyBytes);
 
             return true;
+        }
+        catch (InternalConfigurationException ex)
+        {
+            throw;
         }
         catch (Exception ex)
         {
