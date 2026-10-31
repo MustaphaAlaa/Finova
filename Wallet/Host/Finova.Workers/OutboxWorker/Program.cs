@@ -1,9 +1,10 @@
 using Banks.Infrastructure.Extensions;
 using MassTransit;
 using OutboxWorker.Workers;
+using Shared.Exceptions;
 using Transaction.Contracts.Interfaces;
 using Transaction.Infrastructure;
-using Transactions.Application.Extensions; 
+using Transactions.Application.Extensions;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -19,35 +20,53 @@ builder.Services.AddTransactionsInfrastructure(connectionString);
 
 builder.Services.AddTransactionsApplicationServices();
 
-
 builder.Services.AddHostedService<MessagePublisher>();
 
 builder.Services.AddHostedService<BankTransactionStageFlusherWorker>();
 
+builder.Services.AddSingleton<InboundWebhookMessageChannel>();
+
+// Register before MassTransit so its producers stop before this channel is completed and drained.
+builder.Services.AddHostedService(services =>
+    services.GetRequiredService<InboundWebhookMessageChannel>()
+);
 
 builder.Services.AddScoped<IMessageProcessingRecordWriter, MessageProcessingRecordWriter>();
 
-
 builder.Services.AddMassTransit(x =>
 {
-    x.AddConsumer<InboundWebhookMessagesConsumer>();
+    x.AddConsumer<InboundWebhookMessagesConsumer>(consumer => consumer.ConcurrentMessageLimit = 8);
     x.SetKebabCaseEndpointNameFormatter();
 
-    x.UsingRabbitMq((context, cfg) =>
-
-    {
-        cfg.Host("rabbitmq", "/", h =>
+    x.UsingRabbitMq(
+        (context, cfg) =>
         {
-            h.Username("finova");
-            h.Password(
-                builder.Configuration["RabbitMq:Password"]!
+            cfg.Host(
+                "rabbitmq",
+                "/",
+                h =>
+                {
+                  
+                    h.Username(
+                        builder.Configuration["RabbitMq:USER"]
+                            ?? throw new InternalConfigurationException(
+                                "RabbitMq User is not found"
+                            )
+                    );
+                   
+                    h.Password(
+                        builder.Configuration["RabbitMq:PASS"]
+                            ?? throw new InternalConfigurationException(
+                                "RabbitMq PASS is not found"
+                            )
+                    );
+                }
             );
-        });
 
-        cfg.ConfigureEndpoints(context);
-    });
+            cfg.ConfigureEndpoints(context);
+        }
+    );
 });
-
 
 var host = builder.Build();
 

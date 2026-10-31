@@ -1,0 +1,109 @@
+services:
+  redis:
+    image: redis:7.4.11-alpine
+    container_name: finova-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - finova_redis_cache:/data
+    networks:
+      - finova-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: finova-rabbitmq
+    restart: unless-stopped
+    environment:
+      RabbitMq_USER: ${RABBITMQ_DEFAULT_USER:?RABBITMQ_DEFAULT_USER is required}
+      RabbitMq_PASS: ${RABBITMQ_DEFAULT_PASS:?RABBITMQ_DEFAULT_PASS is required}
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - finova-net
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  finova-database:
+    image: postgres:17
+    container_name: finova-postgresql
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-FinovaDb}
+    volumes:
+      - finova_postgres_data:/var/lib/postgresql/data
+    networks:
+      - finova-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  finova-wallet:
+    container_name: finova-wallet
+    build:
+      context: ./Wallet
+      dockerfile: Dockerfiles/Dockerfile.prod
+    image: finova-wallet:latest
+    restart: unless-stopped
+    depends_on:
+      finova-database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__Redis: redis:6379
+      ConnectionStrings__finovaWalletDb: Host=finova-database;Database=${POSTGRES_DB:-FinovaDb};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};SSL Mode=Prefer
+    networks:
+      - finova-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  finova-outbox-worker:
+    container_name: finova-outbox-worker
+    build:
+      context: ./Wallet
+      dockerfile: Host/Finova.Workers/OutboxWorker/Dockerfiles/Dockerfile.prod
+    image: finova-outbox-worker:latest
+    restart: unless-stopped
+    depends_on:
+      finova-database:
+        condition: service_healthy
+      finova-wallet:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      DOTNET_ENVIRONMENT: Production
+      ConnectionStrings__finovaWalletDb: Host=finova-database;Database=${POSTGRES_DB:-FinovaDb};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};SSL Mode=Prefer
+    networks:
+      - finova-net
+
+volumes:
+  finova_redis_cache:
+  finova_postgres_data:
+  rabbitmq-data:
+
+networks:
+  finova-net:
+    driver: bridge
