@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using Banks.Application.Dtos;
 using Banks.Application.Interfaces.IServices;
@@ -5,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
+
+[assembly: InternalsVisibleTo("Banks.Module.UnitTests")]
 
 namespace Banks.Application.Services.WebhookFilter;
 
@@ -26,15 +29,14 @@ internal sealed class BankWebhookAuthorizationService(
         {
             logger.LogWarning(
                 "Bank webhook authorization rejected because the required "
-                + "headers are invalid or missing. RequestId: {RequestId}",
+                    + "headers are invalid or missing. RequestId: {RequestId}",
                 requestId
             );
-
 
             var errorMessage = context.Result switch
             {
                 ObjectResult result => result.Value?.ToString(),
-                _ => context.Result?.ToString()
+                _ => context.Result?.ToString(),
             };
 
             logger.LogError(
@@ -47,14 +49,15 @@ internal sealed class BankWebhookAuthorizationService(
             return;
         }
 
-        _webhookSignatureInputs = webhookRequestAuthenticator.BuildWebhookSignatureValidationInputs();
+        _webhookSignatureInputs =
+            webhookRequestAuthenticator.BuildWebhookSignatureValidationInputs();
 
         var isAuthorized = await IsWebhookSignatureValidAsync(context);
         if (!isAuthorized)
         {
             logger.LogWarning(
                 "Bank webhook authorization failed due to an invalid "
-                + "signature. RequestId: {RequestId}",
+                    + "signature. RequestId: {RequestId}",
                 requestId
             );
             context.Result = new UnauthorizedObjectResult(
@@ -91,7 +94,14 @@ internal sealed class BankWebhookAuthorizationService(
 
             var buffer = new byte[81920];
             int bytesRead;
-            while ((bytesRead = await request.Body.ReadAsync(buffer, context.HttpContext.RequestAborted)) > 0)
+            while (
+                (
+                    bytesRead = await request.Body.ReadAsync(
+                        buffer,
+                        context.HttpContext.RequestAborted
+                    )
+                ) > 0
+            )
             {
                 hmac.AppendData(buffer, 0, bytesRead);
             }
