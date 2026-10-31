@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using System.Text.Json; 
 
-namespace Banks.Module.UnitTests;
+namespace Shared.UnitTests;
 
 public class InternalConfigurationExceptionHandlerTests
 {

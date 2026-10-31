@@ -4,12 +4,11 @@ using Transaction.Contracts.Interfaces;
 
 namespace Transaction.Infrastructure;
 
-
 public sealed class BankTransactionStageFlusher(
     NpgsqlDataSource dataSource,
-    ILogger<BankTransactionStageFlusher> logger) : IBankTransactionStageFlusher
+    ILogger<BankTransactionStageFlusher> logger
+) : IBankTransactionStageFlusher
 {
-
     private const string FlushSql = """
         WITH batch AS (
             SELECT "Id"
@@ -43,8 +42,7 @@ public sealed class BankTransactionStageFlusher(
                (SELECT count(*) FROM ins)    AS inserted;
         """;
 
-
-    public async Task<long> FlushOnceAsync(CancellationToken ct,int batchSize)
+    public async Task<long> FlushOnceAsync(int batchSize = 5000, CancellationToken ct = default)
     {
         await using var conn = await dataSource.OpenConnectionAsync(ct);
         await using var cmd = new NpgsqlCommand(FlushSql, conn);
@@ -59,7 +57,10 @@ public sealed class BankTransactionStageFlusher(
         if (claimed > 0)
             logger.LogInformation(
                 "Flushed {Claimed} staged rows: {Inserted} inserted, {Skipped} duplicates skipped",
-                claimed, inserted, claimed - inserted);
+                claimed,
+                inserted,
+                claimed - inserted
+            );
 
         return claimed;
     }
