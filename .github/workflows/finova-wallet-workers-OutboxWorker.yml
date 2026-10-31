@@ -10,7 +10,7 @@ on:
       - "Wallet/Shared/**"
       - "!**/*.md"
       - "!**/*.txt"
-      - ".github/workflows/outbox-worker.yml"
+      - ".github/workflows/finova-wallet-workers-OutboxWorker.yml"
   pull_request:
     paths:
       - "Wallet/Host/Finova.Workers/OutboxWorker/**"
@@ -20,7 +20,7 @@ on:
       - "Wallet/Shared/**"
       - "!**/*.md"
       - "!**/*.txt" 
-      - ".github/workflows/outbox-worker.yml"
+      - ".github/workflows/finova-wallet-workers-OutboxWorker.yml"
   workflow_dispatch:
 
 permissions:
