@@ -10,6 +10,7 @@ public class BankTransactionParserResolver(IServiceProvider service)
         // Dynamically resolve the right service implementation at runtime
 
         var factoryServices = service.GetKeyedService<IBankTransactionFactory>(bankCode);
+
         return factoryServices;
     }
 }

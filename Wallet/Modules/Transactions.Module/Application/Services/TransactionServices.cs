@@ -27,7 +27,14 @@ public class TransactionServices(
         TransactionsRequest transactionRequest
     )
     {
-        var transactionFactory = parserResolver.ResolveFactory(nameof(webhookMessage.BankCode));
+        var bankCode =
+            Enum.GetName(webhookMessage.BankCode)
+            ?? throw new ArgumentOutOfRangeException(
+                nameof(webhookMessage.BankCode),
+                webhookMessage.BankCode,
+                "Unknown bank code."
+            );
+        var transactionFactory = parserResolver.ResolveFactory(bankCode);
 
         var parser = transactionFactory.CreateTransactionParser();
 

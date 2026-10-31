@@ -42,7 +42,7 @@ public class WebhookDeliveryValidator(
             throw new ValidationException("Webhook deliveryId is empty");
         }
 
-        if (request.Payload is null || string.IsNullOrWhiteSpace(request.Payload.ToString()))
+        if (request.Payload is null || request.Payload.RootElement.GetPropertyCount() < 1)
         {
             logger.LogWarning("Payload is empty");
             throw new ValidationException("Payload is empty");
