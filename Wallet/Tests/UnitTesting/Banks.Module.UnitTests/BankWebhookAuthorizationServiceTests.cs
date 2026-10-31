@@ -5,12 +5,14 @@ using AutoFixture.AutoMoq;
 using Banks.Application.Dtos;
 using Banks.Application.Interfaces.IServices;
 using Banks.Application.Services.WebhookFilter;
+using Castle.Core.Logging;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Shared.Exceptions;
 
@@ -33,8 +35,7 @@ public class BankWebhookAuthorizationServiceTests
         var authenticator =
             _fixture.Freeze<Mock<IWebhookRequestAuthenticator>>();
 
-        var logger =
-            _fixture.Freeze<Mock<ILogger<BankWebhookAuthorizationService>>>();
+        var logger = NullLogger<BankWebhookAuthorizationService>.Instance;
 
         var settings = new WebhookAuthenticationConfiguration(
             new ConfigurationBuilder().Build());
@@ -67,7 +68,7 @@ public class BankWebhookAuthorizationServiceTests
         var sut = new BankWebhookAuthorizationService(
             settings,
             authenticator.Object,
-            logger.Object);
+            logger);
 
         return new TestHarness(
             sut,
