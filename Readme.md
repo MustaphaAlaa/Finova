@@ -279,8 +279,4 @@ The `docs/` directory contains architecture documentation and workflow guides:
 - [Idempotency](docs/workflows/idempotency.md) — Redis distributed lock and database constraints.
 - [Transaction Parsing](docs/workflows/transaction-parsing.md) — Factory pattern and zero-allocation span parsing.
 
----
 
-## 11. License
-
-This project is licensed under the MIT License.
