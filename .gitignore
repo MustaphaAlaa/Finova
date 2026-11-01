@@ -6,3 +6,4 @@ obj/
 init.sql
 Wallet/build.log
 **.code-workspace
+BankSimulator/
