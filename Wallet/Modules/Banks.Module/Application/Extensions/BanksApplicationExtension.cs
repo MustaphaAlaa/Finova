@@ -29,6 +29,7 @@ public static class BanksApplicationExtension
 
         services.AddScoped<IBankWebhookAuthorizationService, BankWebhookAuthorizationService>();
         services.AddScoped<IBankServices, BankServices>();
+        services.AddScoped<ISendMoneyService, SendMoneyService>();
         services.AddScoped<IWebhookDeliveryValidator, WebhookDeliveryValidator>();
     }
 }
