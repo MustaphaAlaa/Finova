@@ -179,8 +179,10 @@ public sealed class SendMoneyService(
     {
         if (request.Notes is { Count: > 0 })
             root.Add(new XElement("Notes", request.Notes.Select(note => new XElement("Note", note))));
+       
         if (request.PaymentType != 99)
             root.Add(new XElement("PaymentType", request.PaymentType.ToString(CultureInfo.InvariantCulture)));
+       
         if (!string.Equals(request.ChargeDetails, "SHA", StringComparison.OrdinalIgnoreCase))
             root.Add(new XElement("ChargeDetails", request.ChargeDetails.Trim()));
     }
