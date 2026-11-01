@@ -152,7 +152,7 @@ Background workers are registered as long-running Singletons. However, database 
 
 ## 5. Failure Handling and Recovery
 
-1. **Stale Processing Recovery**: If a worker node crashes mid-processing, claimed outbox messages remain locked. [BankOutboxWriter.RequeueStaleProcessingMessagesAsync](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Modules/Banks.Module/Infrastructure/Outbox/BankOutboxWriter.cs#L63) finds messages with `Status = Processing` and `LockedAtUtc < now() - 5 minutes` and resets them to `Pending`.
+1. **Stale Processing Recovery**: If a worker node crashes mid-processing, claimed outbox messages remain locked. [BankOutboxWriter.RequeueStaleProcessingMessagesAsync](Wallet/Modules/Banks.Module/Infrastructure/Outbox/BankOutboxWriter.cs#L63) finds messages with `Status = Processing` and `LockedAtUtc < now() - 5 minutes` and resets them to `Pending`.
 2. **RabbitMQ Retry Policies**: MassTransit handles transient consumer failures according to retry policies. Unrecoverable messages fail and the worker records an audit record in `MessageProcessingRecords` with status `Failed`.
 3. **Invalid Transaction Isolation**: If a single transaction within a 1,000-transaction webhook is invalid (e.g., negative amount, bad date), the valid 999 transactions are still parsed and staged. The rejected transaction is written to `TransacitonProcessingRecords` with the exact validation error message.
 

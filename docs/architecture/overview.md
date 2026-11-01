@@ -25,60 +25,63 @@ The platform's architectural choices are guided by five fundamental engineering 
 The physical deployment and runtime topology consists of two .NET hosts and three supporting infrastructure systems:
 
 ```mermaid
+ 
 graph TB
-    subgraph External Entities
-        BankAcme["Acme Bank Partner"]
-        BankPayTech["PayTech Bank Partner"]
-        ClientUser["Mobile / Web Wallet Client"]
+    subgraph External["External Systems"]
+        Acme["Acme Bank"]
+        PayTech["PayTech Bank"]
+        Client["Mobile / Web Wallet Client"]
     end
 
-    subgraph "Host 1: Web API (Finova.API)"
-        HTTPRouter["ASP.NET Core Kestrel Host<br/><code>Finova.API</code>"]
-        AuthFilter["HMAC-SHA256 Auth Filter<br/><code>AuthorizeBankTransactionWebhook</code>"]
-        IdempFilter["Redis Idempotency Filter<br/><code>IdempotencyAttribute</code>"]
-        BankCtrl["BankController<br/><code>POST /api/bank-webhook/{bankCode}/transaction</code>"]
-        TransferCtrl["TransferController<br/><code>POST /api/transfers/send</code>"]
-        OutboxWriter["Outbox Service<br/><code>BankOutboxWriter</code>"]
+    subgraph API["Finova.API"]
+        BankCtrl["BankController<br/>Bank Webhook Endpoint"]
+        Auth["HMAC-SHA256 Authentication"]
+        Idempotency["Redis Idempotency Check"]
+        TransferCtrl["TransferController<br/>Send Money Endpoint"]
+        Outbox["BankOutboxWriter<br/>Persist Webhook Payload"]
     end
 
-    subgraph "Infrastructure & Cache"
-        RedisCache[("Redis 7.4<br/>Idempotency Keys & Distributed State")]
-        RabbitMQBroker["RabbitMQ 4<br/>Message Broker (MassTransit)"]
-        PostgresDB[("PostgreSQL 17<br/>Database: <code>FinovaDb</code><br/>Schemas: <code>banks</code>, <code>transactions</code>, <code>identity</code>")]
+    subgraph Infrastructure["Infrastructure"]
+        Redis[("Redis 7.4<br/>Idempotency Cache")]
+        RabbitMQ[("RabbitMQ 4<br/>Message Broker")]
+        DB[("PostgreSQL 17<br/>FinovaDb<br/>Banks / Transactions / Identity")]
     end
 
-    subgraph "Host 2: Background Workers (Finova.Workers)"
-        OutboxPublisher["MessagePublisher<br/><code>PeriodicTimer</code> + <code>SKIP LOCKED</code>"]
-        MTConsumer["MassTransit RabbitMQ Consumer<br/><code>InboundWebhookMessagesConsumer</code>"]
-        ChannelPipeline["System.Threading.Channels<br/><code>InboundWebhookMessageChannel</code><br/>(8 Parallel Worker Tasks)"]
-        ParserFactory["Bank Parser Factory<br/><code>AcmeParser</code> / <code>PayTechParser</code>"]
-        BinaryStager["PostgreSQL Binary COPY Stager<br/><code>BankTransactionStager</code>"]
-        StageFlusher["Batch Stage Flusher Worker<br/><code>BankTransactionStageFlusherWorker</code><br/>(32,000 rows/batch)"]
+    subgraph Workers["Finova.Workers"]
+        Publisher["MessagePublisher<br/>Outbox Publisher"]
+        Consumer["InboundWebhookMessagesConsumer<br/>MassTransit"]
+        Channel["InboundWebhookMessageChannel<br/>8 Parallel Workers"]
+        Parser["Bank Parser Factory<br/>AcmeParser / PayTechParser"]
+        Stager["BankTransactionStager<br/>Binary COPY"]
+        Flusher["BankTransactionStageFlusherWorker<br/>Batch Flush: 32K Rows"]
     end
 
-    BankAcme -->|HTTPS Webhook + HMAC Header| HTTPRouter
-    BankPayTech -->|HTTPS Webhook + HMAC Header| HTTPRouter
-    ClientUser -->|HTTPS Transfer Request| HTTPRouter
+    %% Webhook ingestion
+    Acme -->|"HTTPS Webhook"| BankCtrl
+    PayTech -->|"HTTPS Webhook"| BankCtrl
 
-    HTTPRouter --> AuthFilter
-    AuthFilter --> IdempFilter
-    IdempFilter <-->|Check / Set Key| RedisCache
-    IdempFilter --> BankCtrl
-    HTTPRouter --> TransferCtrl
+    BankCtrl --> Auth
+    Auth --> Idempotency
+    Idempotency <-->|"Check / Set Key"| Redis
+    Idempotency --> Outbox
+    Outbox -->|"1. Save Webhook (JSONB)"| DB
 
-    BankCtrl --> OutboxWriter
-    OutboxWriter -->|1. Write Inbound Webhook (JSONB)| PostgresDB
+    %% Money transfer requests
+    Client -->|"HTTPS Transfer Request"| TransferCtrl
 
-    OutboxPublisher -->|2. Claim Batch via Window Func| PostgresDB
-    OutboxPublisher -->|3. Publish Message| RabbitMQBroker
+    %% Outbox publishing
+    Publisher -->|"2. Claim Pending Batch"| DB
+    Publisher -->|"3. Publish Messages"| RabbitMQ
 
-    RabbitMQBroker -->|4. Deliver Message| MTConsumer
-    MTConsumer -->|5. Enqueue WorkItem| ChannelPipeline
-    ChannelPipeline -->|6. Parse Spans| ParserFactory
-    ChannelPipeline -->|7. Binary COPY| BinaryStager
-    BinaryStager -->|8. Insert Staged Rows| PostgresDB
+    %% Message processing
+    RabbitMQ -->|"4. Deliver Message"| Consumer
+    Consumer -->|"5. Enqueue Message"| Channel
+    Channel -->|"6. Parse Transactions"| Parser
+    Parser -->|"7. Parsed Transactions"| Stager
+    Stager -->|"8. Binary COPY to Staging"| DB
 
-    StageFlusher -->|9. Drain Staged Batches to BankTransactions| PostgresDB
+    %% Final persistence
+    Flusher -->|"9. Insert Staged Transactions"| DB
 ```
 
 ---
@@ -86,8 +89,8 @@ graph TB
 ## 4. System Components & Responsibilities
 
 ### 4.1 Finova.API Host
-The [Finova.API](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Host/Finova.API) host is the public-facing HTTP ingress point.
-- **Entry Point**: [Program.cs](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Host/Finova.API/Program.cs)
+The [Finova.API](Wallet/Host/Finova.API) host is the public-facing HTTP ingress point.
+- **Entry Point**: [Program.cs](Wallet/Host/Finova.API/Program.cs)
 - **Role**:
   - Exposes RESTful endpoints for bank webhook notifications (`/api/bank-webhook/{bankCode}/transaction`) and client fund transfers (`/api/transfers/send`).
   - Executes early request validation and cryptographic verification via Action and Authorization Filters before deserializing large payloads.
@@ -96,14 +99,14 @@ The [Finova.API](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Host/
   - Manages database schema migrations upon startup across all module database contexts.
 
 ### 4.2 Finova.Workers (OutboxWorker) Host
-The [Finova.Workers/OutboxWorker](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Host/Finova.Workers/OutboxWorker) host is a dedicated background processing process.
-- **Entry Point**: [Program.cs](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Host/Finova.Workers/OutboxWorker/Program.cs)
+The [Finova.Workers/OutboxWorker](Wallet/Host/Finova.Workers/OutboxWorker) host is a dedicated background processing process.
+- **Entry Point**: [Program.cs](Wallet/Host/Finova.Workers/OutboxWorker/Program.cs)
 - **Role**:
-  - **Message Claiming & Publishing** ([MessagePublisher.cs](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Host/Finova.Workers/OutboxWorker/Workers/MessagePublisher.cs)): Periodically retrieves pending outbox messages from PostgreSQL using payload-size-aware SQL queries with `FOR UPDATE SKIP LOCKED`, then publishes them to RabbitMQ.
-  - **Message Consumption** ([InboundWebhookMessagesConsumer.cs](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Host/Finova.Workers/OutboxWorker/Workers/InboundWebhookMessagesConsumer.cs)): Consumes messages via MassTransit with bounded concurrency.
-  - **Pipeline Processing** ([InboundWebhookMessageChannel.cs](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Host/Finova.Workers/OutboxWorker/Workers/InboundWebhookMessageChannel.cs)): Buffers inbound messages in a bounded channel (capacity 1,500) and dispatches them across 8 parallel reader worker tasks.
-  - **Parsing & Binary Staging** ([BankTransactionStager.cs](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Modules/Transactions.Module/Infrastructure/BankTransactionStager.cs)): Parses transaction strings using zero-allocation span parsers and writes them to a temporary table using PostgreSQL binary `COPY`, then inserts into the staging table.
-  - **Batch Stage Flushing** ([BankTransactionStageFlusherWorker.cs](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Host/Finova.Workers/OutboxWorker/Workers/BankTransactionStageFlusherWorker.cs)): Periodically flushes staged transactions to the final `BankTransactions` table in batches of 32,000 rows.
+  - **Message Claiming & Publishing** ([MessagePublisher.cs](Wallet/Host/Finova.Workers/OutboxWorker/Workers/MessagePublisher.cs)): Periodically retrieves pending outbox messages from PostgreSQL using payload-size-aware SQL queries with `FOR UPDATE SKIP LOCKED`, then publishes them to RabbitMQ.
+  - **Message Consumption** ([InboundWebhookMessagesConsumer.cs](Wallet/Host/Finova.Workers/OutboxWorker/Workers/InboundWebhookMessagesConsumer.cs)): Consumes messages via MassTransit with bounded concurrency.
+  - **Pipeline Processing** ([InboundWebhookMessageChannel.cs](Wallet/Host/Finova.Workers/OutboxWorker/Workers/InboundWebhookMessageChannel.cs)): Buffers inbound messages in a bounded channel (capacity 1,500) and dispatches them across 8 parallel reader worker tasks.
+  - **Parsing & Binary Staging** ([BankTransactionStager.cs](Wallet/Modules/Transactions.Module/Infrastructure/BankTransactionStager.cs)): Parses transaction strings using zero-allocation span parsers and writes them to a temporary table using PostgreSQL binary `COPY`, then inserts into the staging table.
+  - **Batch Stage Flushing** ([BankTransactionStageFlusherWorker.cs](Wallet/Host/Finova.Workers/OutboxWorker/Workers/BankTransactionStageFlusherWorker.cs)): Periodically flushes staged transactions to the final `BankTransactions` table in batches of 32,000 rows.
 
 ### 4.3 PostgreSQL 17 Storage
 A single PostgreSQL instance (`FinovaDb`) is partitioned into three strictly isolated logical schemas:
@@ -178,8 +181,8 @@ sequenceDiagram
 
 | Area | Primary Document | Source Location |
 | :--- | :--- | :--- |
-| **Modular Monolith** | [modular-monolith.md](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/architecture/modular-monolith.md) | [Wallet/Modules](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Modules) |
-| **Module Details** | [modules.md](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/architecture/modules.md) | [Banks](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Modules/Banks.Module), [Transactions](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Modules/Transactions.Module), [Identity](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Modules/Identity.Module) |
-| **Dependency Governance** | [dependency-rules.md](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/architecture/dependency-rules.md) | [init_Finova.sh](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/init_Finova.sh) |
-| **Database Architecture** | [database-design.md](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/architecture/database-design.md) | [BanksDbContext.cs](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Modules/Banks.Module/Infrastructure/BanksDbContext.cs), [TransactionDbContext.cs](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Modules/Transactions.Module/Infrastructure/TransactionDbContext.cs) |
-| **Background Processing** | [background-processing.md](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/architecture/background-processing.md) | [Wallet/Host/Finova.Workers/OutboxWorker](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Host/Finova.Workers/OutboxWorker) |
+| **Modular Monolith** | [modular-monolith.md](docs/architecture/modular-monolith.md) | [Wallet/Modules](Wallet/Modules) |
+| **Module Details** | [modules.md](docs/architecture/modules.md) | [Banks](Wallet/Modules/Banks.Module), [Transactions](Wallet/Modules/Transactions.Module), [Identity](Wallet/Modules/Identity.Module) |
+| **Dependency Governance** | [dependency-rules.md](docs/architecture/dependency-rules.md) | [init_Finova.sh](init_Finova.sh) |
+| **Database Architecture** | [database-design.md](docs/architecture/database-design.md) | [BanksDbContext.cs](Wallet/Modules/Banks.Module/Infrastructure/BanksDbContext.cs), [TransactionDbContext.cs](Wallet/Modules/Transactions.Module/Infrastructure/TransactionDbContext.cs) |
+| **Background Processing** | [background-processing.md](docs/architecture/background-processing.md) | [Wallet/Host/Finova.Workers/OutboxWorker](Wallet/Host/Finova.Workers/OutboxWorker) |

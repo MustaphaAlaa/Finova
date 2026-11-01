@@ -6,7 +6,7 @@
 [![RabbitMQ 4](https://img.shields.io/badge/RabbitMQ-4.0-FF6600?logo=rabbitmq&logoColor=white)](https://www.rabbitmq.com/)
 [![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
 [![CI Build & Test](https://github.com/MustaphaAlaa/Finova/actions/workflows/finova-wallet-ci.yml/badge.svg)](https://github.com/MustaphaAlaa/Finova/actions)
-[![Tests Passing](https://img.shields.io/badge/Tests-152%20Passed-brightgreen)](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Tests/UnitTesting)
+[![Tests Passing](https://img.shields.io/badge/Tests-152%20Passed-brightgreen)](Wallet/Tests/UnitTesting)
 
 > **Educational & Engineering Reference**: Finova is an enterprise-grade digital wallet backend engineering showcase built on .NET 10. It is engineered to solve the complex real-world challenges of high-volume financial webhook ingestion, cryptographic multi-tenant bank authentication, asynchronous outbox decoupling, zero-allocation transaction parsing, and two-tier idempotency.
 
@@ -89,7 +89,7 @@ The architecture was validated under high-stress batch conditions:
 
 ## 4. Key Features
 
-- **Modular Monolith**: Strict architectural boundaries separating [Banks.Module](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Modules/Banks.Module), [Transactions.Module](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Modules/Transactions.Module), and [Identity.Module](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Modules/Identity.Module), communicating solely through explicit contracts and asynchronous messages.
+- **Modular Monolith**: Strict architectural boundaries separating [Banks.Module](Wallet/Modules/Banks.Module), [Transactions.Module](Wallet/Modules/Transactions.Module), and [Identity.Module](Wallet/Modules/Identity.Module), communicating solely through explicit contracts and asynchronous messages.
 - **Cryptographic Webhook Authentication**: Bank-specific HMAC-SHA256 signature verification with Unix timestamp drift tolerance (-3 min / +5 min) and constant-time equality checks.
 - **Streaming Action Filter Validation**: Rejects malformed bodies, untrusted banks, and invalid signatures before hitting controller business logic or consuming database I/O.
 - **Two-Tier Idempotency**: Redis distributed lock/cache with HTTP 409 Conflict detection combined with database-level unique constraints.
@@ -122,64 +122,14 @@ The architecture was validated under high-stress batch conditions:
 ## 6. Architecture at a Glance
 
 The solution is divided into two primary runtime hosts and three domain modules:
-
-```mermaid
-graph TB
-    subgraph External Banks
-        Acme[Acme Bank]
-        PayTech[PayTech Bank]
-    end
-
-    subgraph Host: Finova.API
-        Controller[BankController<br/>/api/bank-webhook/{bankCode}/transaction]
-        AuthFilter[AuthorizeBankTransactionWebhook<br/>HMAC-SHA256 Streaming]
-        Idempotency[IdempotencyAttribute<br/>Redis Check]
-        DeliveryVal[WebhookDeliveryValidator]
-        OutboxWriter[BankOutboxWriter]
-    end
-
-    subgraph Storage
-        Postgres[PostgreSQL 17<br/>FinovaDb]
-        Redis[Redis 7.4<br/>Idempotency Cache]
-        RabbitMQ[RabbitMQ 4<br/>Inbound Webhook Messages]
-    end
-
-    subgraph Host: Finova.Workers (OutboxWorker)
-        Publisher[MessagePublisher<br/>FOR UPDATE SKIP LOCKED]
-        Consumer[InboundWebhookMessagesConsumer<br/>MassTransit]
-        Channel[InboundWebhookMessageChannel<br/>Bounded System.Threading.Channel]
-        ParserResolver[BankTransactionParserResolver<br/>ReadOnlySpan Parsers]
-        Stager[BankTransactionStager<br/>PostgreSQL Binary COPY]
-        Flusher[BankTransactionStageFlusherWorker<br/>Batch Flush 32k rows]
-    end
-
-    Acme -->|POST Webhook + Signature| Controller
-    PayTech -->|POST Webhook + Signature| Controller
-
-    Controller --> AuthFilter
-    AuthFilter --> Idempotency
-    Idempotency <-->|Read / Set in-progress| Redis
-    Idempotency --> DeliveryVal
-    DeliveryVal --> OutboxWriter
-    OutboxWriter -->|Insert JSONB Payload| Postgres
-
-    Publisher -->|Claim Batch via SUM OVER| Postgres
-    Publisher -->|Publish Message| RabbitMQ
-    RabbitMQ -->|Consume| Consumer
-    Consumer -->|Enqueue| Channel
-    Channel -->|Parse| ParserResolver
-    ParserResolver -->|Binary COPY| Stager
-    Stager -->|Write Temp Table & Insert Stage| Postgres
-    Flusher -->|Batch Flush 32k rows to Final Table| Postgres
-```
-
+  
 For comprehensive architectural design, module interfaces, and sequence flows, refer to:
-- [Architecture Overview](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/architecture/overview.md)
-- [Modular Monolith Architecture](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/architecture/modular-monolith.md)
-- [Module Catalog & Responsibilities](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/architecture/modules.md)
-- [Dependency Rules](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/architecture/dependency-rules.md)
-- [Database Design & Schema Isolation](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/architecture/database-design.md)
-- [Background Processing](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/architecture/background-processing.md)
+- [Architecture Overview](docs/architecture/overview.md)
+- [Modular Monolith Architecture](docs/architecture/modular-monolith.md)
+- [Module Catalog & Responsibilities](docs/architecture/modules.md)
+- [Dependency Rules](docs/architecture/dependency-rules.md)
+- [Database Design & Schema Isolation](docs/architecture/database-design.md)
+- [Background Processing](docs/architecture/background-processing.md)
 
 ---
 
@@ -219,10 +169,7 @@ POSTGRES_DB=FinovaDb
 RABBITMQ_DEFAULT_USER=finova
 RABBITMQ_DEFAULT_PASS=your_secure_rabbitmq_password
 ```
-
-> [!WARNING]
-> Never commit actual passwords, API keys, or banking shared secrets to source control. Production configurations should inject credentials via environment variables or secret vaults.
-
+  
 ### 8.3 Starting Infrastructure via Docker Compose
 To launch PostgreSQL 17, Redis 7.4, RedisInsight, and RabbitMQ:
 
@@ -308,59 +255,32 @@ dotnet test Wallet/Tests/UnitTesting/Shared.UnitTests/
 dotnet test Wallet/Tests/UnitTesting/Identity.Module.UnitTests/
 ```
 
-For test suite organization and integration testing plans, see [Unit Testing Documentation](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/testing/unit-testing.md) and [Integration Testing Plans](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/testing/integration-testing.md).
+For the test suite organization, see [Unit Tests](Wallet/Tests/UnitTesting/) and [Integration Tests](Wallet/Tests/Integrations/).
 
 ---
 
 ## 10. Documentation Index
 
-The `docs/` directory contains comprehensive technical documentation, workflows, infrastructure specifications, and Architecture Decision Records (ADRs):
+The `docs/` directory contains architecture documentation and workflow guides:
 
 ### Architecture
-- [Architecture Overview](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/architecture/overview.md) — System boundaries, components, and topology.
-- [Modular Monolith Architecture](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/architecture/modular-monolith.md) — Rationale, benefits, and trade-offs.
-- [Module Catalog](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/architecture/modules.md) — Detailed breakdown of Banks, Transactions, Identity, and Shared.
-- [Dependency Rules](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/architecture/dependency-rules.md) — Enforcement of boundaries and layer flow.
-- [Database Design](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/architecture/database-design.md) — Schema isolation, table definitions, and indexes.
-- [Background Processing](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/architecture/background-processing.md) — Outbox worker, MassTransit, channels, and stage flusher.
+- [Architecture Overview](docs/architecture/overview.md) — System boundaries, components, and topology.
+- [Modular Monolith Architecture](docs/architecture/modular-monolith.md) — Rationale, benefits, and trade-offs.
+- [Module Catalog](docs/architecture/modules.md) — Detailed breakdown of Banks, Transactions, Identity, and Shared.
+- [Dependency Rules](docs/architecture/dependency-rules.md) — Enforcement of boundaries and layer flow.
+- [Database Design](docs/architecture/database-design.md) — Schema isolation, table definitions, and indexes.
+- [Background Processing](docs/architecture/background-processing.md) — Outbox worker, MassTransit, channels, and stage flusher.
 
 ### Workflows
-- [Webhook Ingestion](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/workflows/webhook-ingestion.md) — End-to-end lifecycle of an incoming bank webhook.
-- [Webhook Authentication](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/workflows/webhook-authentication.md) — HMAC-SHA256 verification and replay protection.
-- [Outbox Processing](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/workflows/outbox-processing.md) — Payload-size-aware claiming and concurrency.
-- [Transaction Processing](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/workflows/transaction-processing.md) — Consumption, validation, staging, and flushing.
-- [Idempotency](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/workflows/idempotency.md) — Redis distributed lock and database constraints.
-- [Transaction Parsing](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/workflows/transaction-parsing.md) — Factory pattern and zero-allocation span parsing.
-
-### Infrastructure & Operations
-- [Docker & Containerization](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/infrastructure/docker.md) — Multi-stage Dockerfiles and compose setups.
-- [Environment Configuration](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/infrastructure/environment-configuration.md) — Complete environment variable reference.
-- [PostgreSQL Configuration](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/infrastructure/postgresql.md) — Database tuning, binary COPY, and schemas.
-- [Redis Configuration](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/infrastructure/redis.md) — Redis setup, TTLs, and key namespaces.
-- [RabbitMQ Configuration](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/infrastructure/rabbitmq.md) — MassTransit broker configuration.
-- [Database Migrations](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/infrastructure/database-migrations.md) — Migration guides per DbContext.
-- [CI/CD Pipelines](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/infrastructure/ci-cd.md) — GitHub Actions pipeline stages.
-
-### Testing & Performance
-- [Unit Testing](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/testing/unit-testing.md) — Test suites, mocking, and coverage.
-- [Integration Testing Plans](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/testing/integration-testing.md) — Planned Testcontainers and WebApplicationFactory tests.
-- [Performance Testing](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/testing/performance-testing.md) — 1M transaction benchmark details.
-
-### Architecture Decision Records (ADRs)
-- [ADR Index](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/decisions/README.md)
-- [ADR-0001: Modular Monolith Architecture](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/decisions/0001-modular-monolith.md)
-- [ADR-0002: Outbox Pattern for Webhook Ingestion](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/decisions/0002-outbox-pattern.md)
-- [ADR-0003: Two-Tier Idempotency Strategy](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/decisions/0003-idempotency-strategy.md)
-- [ADR-0004: Payload-Size-Aware Batching](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/decisions/0004-payload-size-aware-batching.md)
-- [ADR-0005: Factory-Based Bank-Specific Parsers with Spans](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/decisions/0005-bank-specific-parsers.md)
-- [ADR-0006: Shared-Secret Webhook Authentication](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/decisions/0006-shared-secret-webhook-authentication.md)
-- [ADR-0007: Two-Phase Transaction Staging and Binary COPY](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/decisions/0007-transaction-staging-and-bulk-copy.md)
-
-### Diagrams & Visual Assets
-- [Diagrams Catalog & Figma Recommendations](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/diagrams/README.md) — Complete Mermaid diagram registry and layout specifications for executive Figma diagrams.
+- [Webhook Ingestion](docs/workflows/webhook-ingestion.md) — End-to-end lifecycle of an incoming bank webhook.
+- [Webhook Authentication](docs/workflows/webhook-authentication.md) — HMAC-SHA256 verification and replay protection.
+- [Outbox Processing](docs/workflows/outbox-processing.md) — Payload-size-aware claiming and concurrency.
+- [Transaction Processing](docs/workflows/transaction-processing.md) — Consumption, validation, staging, and flushing.
+- [Idempotency](docs/workflows/idempotency.md) — Redis distributed lock and database constraints.
+- [Transaction Parsing](docs/workflows/transaction-parsing.md) — Factory pattern and zero-allocation span parsing.
 
 ---
 
 ## 11. License
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+This project is licensed under the MIT License.
