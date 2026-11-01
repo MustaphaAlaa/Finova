@@ -64,10 +64,10 @@ flowchart TD
 The endpoint route contains the bank's identifier:
 `POST /api/bank-webhook/{bankCode}/transaction`
 
-[RequestUtilities.cs](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Shared/Services/RequestUtilities.cs) extracts `{bankCode}` (e.g., `Acme`, `PayTech`) from `context.RouteData.Values`.
+[RequestUtilities.cs](/Wallet/Shared/Services/RequestUtilities.cs) extracts `{bankCode}` (e.g., `Acme`, `PayTech`) from `context.RouteData.Values`.
 
 ### 3.2 Configuration Lookup
-[WebhookAuthenticationConfiguration.cs](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Modules/Banks.Module/Application/Services/WebhookFilter/WebhookAuthenticationConfiguration.cs) resolves the bank's configuration keys from `appsettings.json`:
+[WebhookAuthenticationConfiguration.cs](/Wallet/Modules/Banks.Module/Application/Services/WebhookFilter/WebhookAuthenticationConfiguration.cs) resolves the bank's configuration keys from `appsettings.json`:
 
 ```json
 {
@@ -87,7 +87,7 @@ The endpoint route contains the bank's identifier:
 ```
 
 ### 3.3 Timestamp Validation and Replay Protection
-In [WebhookRequestAuthenticator.cs](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Modules/Banks.Module/Application/Services/WebhookFilter/WebhookRequestAuthenticator.cs#L95):
+In [WebhookRequestAuthenticator.cs](/Wallet/Modules/Banks.Module/Application/Services/WebhookFilter/WebhookRequestAuthenticator.cs#L95):
 1. Reads the header `x-{bankCode}-Webhook-Timestamp`.
 2. Parses the value as a 64-bit Unix timestamp integer.
 3. Computes the permissible time envelope:
@@ -100,7 +100,7 @@ In [WebhookRequestAuthenticator.cs](file:///Users/mostafa/IamBack/dotnet-csharp/
    `400 Bad Request: Timestamp is outside the allowed time window.`
 
 ### 3.4 Streaming HMAC Calculation
-In [BankWebhookAuthorizationService.cs](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Modules/Banks.Module/Application/Services/WebhookFilter/BankWebhookAuthorizationService.cs#L76):
+In [BankWebhookAuthorizationService.cs](/Wallet/Modules/Banks.Module/Application/Services/WebhookFilter/BankWebhookAuthorizationService.cs#L76):
 
 Loading entire 3 MB request payloads into a single memory buffer to calculate a hash causes excessive heap allocations and LOH (Large Object Heap) fragmentation. Finova streams the request body in **81,920-byte (80 KB) buffers** using `System.Security.Cryptography.IncrementalHash`:
 
@@ -181,5 +181,5 @@ During system design, generating rotating webhook URLs for each bank was evaluat
 
 ## 6. Related Documentation
 
-- [Webhook Ingestion Workflow](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/workflows/webhook-ingestion.md)
-- [ADR-0006: Shared-Secret Webhook Authentication](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/decisions/0006-shared-secret-webhook-authentication.md)
+- [Webhook Ingestion Workflow](/docs/workflows/webhook-ingestion.md)
+- [ADR-0006: Shared-Secret Webhook Authentication](/docs/decisions/0006-shared-secret-webhook-authentication.md)

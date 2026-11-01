@@ -133,7 +133,7 @@ erDiagram
 
 ### 3.1 Schema `banks` (Context: `BanksDbContext`)
 
-Configured in [BanksDbContext.cs](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Modules/Banks.Module/Infrastructure/BanksDbContext.cs#L23): `builder.HasDefaultSchema("banks");`
+Configured in [BanksDbContext.cs](/Wallet/Modules/Banks.Module/Infrastructure/BanksDbContext.cs#L23): `builder.HasDefaultSchema("banks");`
 
 #### Table: `banks."InboundWebhookMessages"` (Outbox Table)
 The heart of the asynchronous ingestion pipeline. Stores validated raw webhook payloads.
@@ -171,13 +171,13 @@ CREATE TABLE banks."InboundWebhookMessages" (
   *Rationale*: The Outbox Worker polls only for pending messages (`Status = 0`). A filtered index ensures index scan lookups remain lightning-fast and never bloat with historical processed messages.
 
 #### Tables: `banks."Banks"`, `banks."BankAccounts"`, `banks."BankAccountsBalances"`, `banks."Currencies"`
-Standard relational structures managing client bank accounts and ledger balances used by [SendMoneyService.cs](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Modules/Banks.Module/Application/Services/SendMoneyService.cs) for outbound transfer validation.
+Standard relational structures managing client bank accounts and ledger balances used by [SendMoneyService.cs](/Wallet/Modules/Banks.Module/Application/Services/SendMoneyService.cs) for outbound transfer validation.
 
 ---
 
 ### 3.2 Schema `transactions` (Context: `TransactionsDbContext`)
 
-Configured in [TransactionDbContext.cs](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Modules/Transactions.Module/Infrastructure/TransactionDbContext.cs#L20): `builder.HasDefaultSchema("transactions");`
+Configured in [TransactionDbContext.cs](/Wallet/Modules/Transactions.Module/Infrastructure/TransactionDbContext.cs#L20): `builder.HasDefaultSchema("transactions");`
 
 #### Table: `transactions."bank_transaction_stage"` (Staging Buffer)
 Buffer table populated via high-speed PostgreSQL binary `COPY` during message consumption.
@@ -210,7 +210,7 @@ CREATE TABLE transactions.bank_transaction_stage (
   ON transactions.bank_transaction_stage ("StagedAtUtc") 
   WHERE "InsertedAtUtc" IS NULL;
   ```
-  *Rationale*: Enables [BankTransactionStageFlusher](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Modules/Transactions.Module/Infrastructure/BankTransactionStageFlusher.cs) to quickly claim un-inserted batches without scanning already flushed rows.
+  *Rationale*: Enables [BankTransactionStageFlusher](/Wallet/Modules/Transactions.Module/Infrastructure/BankTransactionStageFlusher.cs) to quickly claim un-inserted batches without scanning already flushed rows.
 
 #### Table: `transactions."BankTransactions"` (Permanent Ledger)
 The definitive, immutable transaction store.
@@ -241,7 +241,7 @@ Audit tables capturing overall delivery processing status and individual rejecte
 
 ### 3.3 Schema `identity` (Context: `IdentityModuleDbContext`)
 
-Configured in [IdentityModuleDbContext.cs](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Modules/Identity.Module/Infrastructure/IdentityModuleDbContext.cs#L16): `builder.HasDefaultSchema("identity");`
+Configured in [IdentityModuleDbContext.cs](/Wallet/Modules/Identity.Module/Infrastructure/IdentityModuleDbContext.cs#L16): `builder.HasDefaultSchema("identity");`
 
 Houses the standard ASP.NET Core Identity tables (`AspNetUsers`, `AspNetRoles`, `AspNetUserClaims`, etc.) partitioned cleanly under the `identity` schema.
 
@@ -274,7 +274,7 @@ dotnet ef migrations add <MigrationName> \
 ```
 
 ### 4.2 Automated Runtime Migrations
-At startup, [Finova.API/Program.cs](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Host/Finova.API/Program.cs#L23) invokes:
+At startup, [Finova.API/Program.cs](/Wallet/Host/Finova.API/Program.cs#L23) invokes:
 ```csharp
 await app.Services.MigrateFinovaDatabasesAsync();
 ```
@@ -284,7 +284,7 @@ which sequentially applies pending migrations across `BanksDbContext`, `Identity
 
 ## 5. Related Documentation
 
-- [PostgreSQL Infrastructure Guide](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/infrastructure/postgresql.md)
-- [Database Migrations Guide](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/infrastructure/database-migrations.md)
-- [Outbox Processing Workflow](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/workflows/outbox-processing.md)
-- [Transaction Staging & Bulk Copy ADR](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/decisions/0007-transaction-staging-and-bulk-copy.md)
+- [PostgreSQL Infrastructure Guide](/docs/infrastructure/postgresql.md)
+- [Database Migrations Guide](/docs/infrastructure/database-migrations.md)
+- [Outbox Processing Workflow](/docs/workflows/outbox-processing.md)
+- [Transaction Staging & Bulk Copy ADR](/docs/decisions/0007-transaction-staging-and-bulk-copy.md)

@@ -11,29 +11,54 @@ The Webhook Ingestion workflow represents the primary entry point for funds arri
 ## 2. Ingestion Lifecycle Flowchart
 
 ```mermaid
-flowchart TD
-    Start(["Incoming HTTP POST /api/bank-webhook/{bankCode}/transaction"]) --> RouteCheck{"Extract bankCode from Route"}
-    RouteCheck -->|Missing / Invalid| R400["400 Bad Request: Missing bank code"]
+ flowchart TD
+    Start(["Incoming HTTP POST<br/>/api/bank-webhook/{bankCode}/transaction"])
 
-    RouteCheck --> AuthCheck{"AuthorizeBankTransactionWebhook<br/>Header & Timestamp Check"}
-    AuthCheck -->|Missing Headers / Clock Skew| R400Auth["400 Bad Request: Invalid headers/timestamp"]
+    Start --> RouteCheck{"Extract and validate bankCode"}
+    RouteCheck -->|Missing / Invalid| R400["400 Bad Request<br/>Invalid bank code"]
+    RouteCheck -->|Valid| AuthCheck{"AuthorizeBankTransactionWebhook<br/>Validate required headers and timestamp"}
 
-    AuthCheck --> HMAC{"Compute HMAC-SHA256<br/>(80KB Streaming Chunk Hash)"}
-    HMAC -->|Signature Mismatch| R401["401 Unauthorized: Invalid Webhook Key"]
+    AuthCheck -->|Missing headers / Invalid timestamp| R400Auth["400 Bad Request<br/>Invalid webhook headers or timestamp"]
+    AuthCheck -->|Valid| HMAC["Compute HMAC-SHA256<br/>Stream request body in 80 KB chunks"]
 
-    HMAC --> IdempCheck{"Idempotency Filter<br/>(Redis: idempotency:{bank}:{key})"}
-    IdempCheck -->|In-Progress (Status 102)| R409["409 Conflict: Concurrent delivery"]
-    IdempCheck -->|Already Completed| R200Cache["200 OK: Cached Response"]
+    HMAC --> SignatureCheck{"Verify signature"}
+    SignatureCheck -->|Invalid signature| R401["401 Unauthorized<br/>Invalid webhook signature"]
+    SignatureCheck -->|Valid| IdempCheck{"Idempotency Filter<br/>Redis: idempotency:{bankCode}:{key}"}
 
-    IdempCheck -->|New Request| SetRedis["Set Redis Key = in-progress (TTL 3m)"]
-    SetRedis --> ValPayload{"WebhookDeliveryValidator<br/>Check Empty, Bank Contract, DB Duplicates"}
-    ValPayload -->|Delivery ID Exists in DB| R400Dup["400 Bad Request: Already sent to us"]
-    ValPayload -->|Bank Not Contracted| R400Contract["400 Bad Request: Not contracted"]
+    IdempCheck -->|In Progress| R409["409 Conflict<br/>Concurrent delivery"]
+    IdempCheck -->|Already Completed| R200Cache["200 OK<br/>Return cached response"]
+    IdempCheck -->|New Request| SetRedis["Atomically acquire Redis key<br/>Status = In Progress<br/>TTL = 3 minutes"]
 
-    ValPayload --> Outbox["BankServices.WriteToOutboxAsync<br/>Calculate Payload Byte Size"]
-    Outbox --> DBInsert[("INSERT INTO banks.InboundWebhookMessages<br/>Status = Pending (0), Payload = JSONB")]
-    DBInsert --> CacheResponse["Update Redis Key with 200 OK Value"]
-    CacheResponse --> R200["200 OK: 'Transaction received'"]
+    SetRedis --> AcquireCheck{"Acquired lock?"}
+    AcquireCheck -->|No| IdempCheck
+    AcquireCheck -->|Yes| ValPayload{"WebhookDeliveryValidator<br/>Validate payload, bank contract,<br/>and delivery ID"}
+
+    ValPayload -->|Empty / Malformed Payload| R400Payload["400 Bad Request<br/>Invalid payload"]
+    ValPayload -->|Bank Not Contracted| R400Contract["400 Bad Request<br/>Bank not contracted"]
+    ValPayload -->|Delivery ID Already Exists| R200Dup["200 OK<br/>Delivery already received"]
+    ValPayload -->|Valid| Outbox["BankServices.WriteToOutboxAsync<br/>Calculate payload byte size"]
+
+    Outbox --> DBInsert[("INSERT INTO banks.InboundWebhookMessages<br/>Status = Pending (0)<br/>Payload = JSONB<br/>WebhookDeliveryId = Unique")]
+
+    DBInsert --> DBCheck{"Database insertion successful?"}
+    DBCheck -->|No| ReleaseRedis["Release / Reset Redis In-Progress Key"]
+    DBCheck -->|Yes| CacheResponse["Update Redis key<br/>Status = Completed<br/>Cache HTTP 200 response"]
+
+    CacheResponse --> R200["200 OK<br/>Transaction received"]
+
+    ReleaseRedis --> R500["500 Internal Server Error<br/>Failed to persist webhook"]
+
+    R400Payload --> ReleaseInvalid["Release Redis In-Progress Key"]
+    R400Contract --> ReleaseInvalid
+    R200Dup --> ReleaseRedis
+    ReleaseInvalid --> End(["End"])
+    R400 --> End
+    R400Auth --> End
+    R401 --> End
+    R409 --> End
+    R200Cache --> End
+    R200 --> End
+    R500 --> End
 ```
 
 ---
@@ -72,40 +97,40 @@ Payload structure:
 ```
 
 ### Step 2: Bank Route Identification
-In [RequestUtilities.cs](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Shared/Services/RequestUtilities.cs), the route parameter `{bankCode}` is retrieved. If empty or invalid, the pipeline halts with `400 Bad Request`.
+In [RequestUtilities.cs](/Wallet/Shared/Services/RequestUtilities.cs), the route parameter `{bankCode}` is retrieved. If empty or invalid, the pipeline halts with `400 Bad Request`.
 
 ### Step 3: Webhook Cryptographic Authentication
-[BankTransactionWebhookAuthorizationAuthorizationFilter](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Modules/Banks.Module/Application/Services/WebhookFilter/BankTransactionWebhookAuthorizationAuthorizationFilter.cs) executes:
+[BankTransactionWebhookAuthorizationAuthorizationFilter](/Wallet/Modules/Banks.Module/Application/Services/WebhookFilter/BankTransactionWebhookAuthorizationAuthorizationFilter.cs) executes:
 1. Validates that `x-{BankCode}-Webhook-Signature` and `x-{BankCode}-Webhook-Timestamp` are present.
 2. Checks clock drift: Rejects if the timestamp is more than **3 minutes behind** or **5 minutes ahead** of current server UTC time.
 3. Retrieves the bank's configured secret key from `WebhooksHeaders:{BankCode}:SecretKey`.
 4. Streams the request body in 80 KB chunks through `IncrementalHash.CreateHMAC(HashAlgorithmName.SHA256, secretKey)`.
 5. Compares expected and received signatures with `CryptographicOperations.FixedTimeEquals`. If signatures do not match, returns `401 Unauthorized`.
 
-*(See [Webhook Authentication](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/workflows/webhook-authentication.md) for complete details).*
+*(See [Webhook Authentication](/docs/workflows/webhook-authentication.md) for complete details).*
 
 ### Step 4: Distributed Idempotency Check (Redis)
-[IdempotencyAttribute](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Modules/Banks.Module/Presentation/Filters/IdempotencyAttribute.cs) inspects Redis for key:
+[IdempotencyAttribute](/Wallet/Modules/Banks.Module/Presentation/Filters/IdempotencyAttribute.cs) inspects Redis for key:
 `idempotency:{bankCode}:{idempotencyKey}`
 - **Cache Hit (Status 102 - Processing)**: Another request with the same idempotency key is currently running. Returns `409 Conflict`.
 - **Cache Hit (Completed 2xx Response)**: Returns the cached response object immediately.
 - **Cache Miss**: Atomically sets `idempotency:{bankCode}:{idempotencyKey}` with status `102 (Processing)` and TTL = 3 minutes (`When.NotExists`).
 
 ### Step 5: Webhook Delivery Validation
-[WebhookDeliveryValidator](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Modules/Banks.Module/Application/Services/WebhookFilter/WebhookDeliveryValidator.cs) performs domain validation:
+[WebhookDeliveryValidator](/Wallet/Modules/Banks.Module/Application/Services/WebhookFilter/WebhookDeliveryValidator.cs) performs domain validation:
 1. `WebhookDeliveryId` must not be `Guid.Empty`.
 2. `Payload` must contain at least 1 element.
 3. `BankCode` must match an active contracted bank in the `banks."Banks"` table (`Contracted == true`).
 4. Checks PostgreSQL: Ensures `WebhookDeliveryId` does not already exist in `banks."InboundWebhookMessages"` via `ExistsByDeliveryIdAsync`.
 
 ### Step 6: Payload Size Calculation & Outbox Persistence
-In [BankServices.WriteToOutboxAsync](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Modules/Banks.Module/Application/Services/BankServices.cs#L20):
+In [BankServices.WriteToOutboxAsync](/Wallet/Modules/Banks.Module/Application/Services/BankServices.cs#L20):
 1. Calculates exact UTF-8 byte size of the raw JSON string:
    ```csharp
    var jsonStr = request.Payload.RootElement.GetRawText();
    long payloadSizeBytes = Encoding.UTF8.GetByteCount(jsonStr);
    ```
-2. Instantiates [InboundWebhookMessage](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/Wallet/Modules/Banks.Module/Contracts/Entities/InboundWebhookMessage.cs):
+2. Instantiates [InboundWebhookMessage](/Wallet/Modules/Banks.Module/Contracts/Entities/InboundWebhookMessage.cs):
    - `WebhookDeliveryId = request.WebhookDeliveryId`
    - `BankId = bank.Id`
    - `BankCode = request.BankCode`
@@ -143,7 +168,7 @@ In [BankServices.WriteToOutboxAsync](file:///Users/mostafa/IamBack/dotnet-csharp
 
 ## 5. Related Documentation
 
-- [Webhook Authentication Workflow](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/workflows/webhook-authentication.md)
-- [Outbox Processing Workflow](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/workflows/outbox-processing.md)
-- [Idempotency Strategy](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/workflows/idempotency.md)
-- [ADR-0002: Outbox Pattern](file:///Users/mostafa/IamBack/dotnet-csharp/Finova/docs/decisions/0002-outbox-pattern.md)
+- [Webhook Authentication Workflow](/docs/workflows/webhook-authentication.md)
+- [Outbox Processing Workflow](/docs/workflows/outbox-processing.md)
+- [Idempotency Strategy](/docs/workflows/idempotency.md)
+- [ADR-0002: Outbox Pattern](/docs/decisions/0002-outbox-pattern.md)
