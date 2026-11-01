@@ -153,6 +153,24 @@ namespace Banks.Infrastructure.Migrations
                     b.HasIndex("BankId", "AccountNumber", "CurrencyId");
 
                     b.ToTable("BankAccounts", "banks");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("a68e3e38-0de1-4ad0-92c7-21b783702f81"),
+                            AccountNumber = "TEST-ACME-0001",
+                            ApplicationUserId = new Guid("f108f490-6007-49bf-8f5c-c2fd24d9d909"),
+                            BankId = new Guid("c9337615-fb2b-4be1-9da0-c9704d546bf6"),
+                            CurrencyId = new Guid("00596123-1c69-4603-ac90-4bbe433621e9")
+                        },
+                        new
+                        {
+                            Id = new Guid("be906bfd-7598-41dd-85c1-244b62fb2a36"),
+                            AccountNumber = "TEST-PAYTECH-0001",
+                            ApplicationUserId = new Guid("f108f490-6007-49bf-8f5c-c2fd24d9d909"),
+                            BankId = new Guid("4b42ad75-6775-44af-931f-f5fb3f38b75a"),
+                            CurrencyId = new Guid("00596123-1c69-4603-ac90-4bbe433621e9")
+                        });
                 });
 
             modelBuilder.Entity("Banks.Domain.Entities.BankAccountBalance", b =>
@@ -175,6 +193,22 @@ namespace Banks.Infrastructure.Migrations
                     b.HasIndex("BankAccountId");
 
                     b.ToTable("BankAccountsBalances", "banks");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("635b69d6-d1f6-4b9a-93e6-06e3a8a40577"),
+                            Balance = 25000.00m,
+                            BankAccountId = new Guid("a68e3e38-0de1-4ad0-92c7-21b783702f81"),
+                            LastUpdate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("4f3d9d40-43df-4d81-88f9-b293f7b85c22"),
+                            Balance = 12000.00m,
+                            BankAccountId = new Guid("be906bfd-7598-41dd-85c1-244b62fb2a36"),
+                            LastUpdate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        });
                 });
 
             modelBuilder.Entity("Banks.Domain.Entities.Currency", b =>
@@ -262,7 +296,7 @@ namespace Banks.Infrastructure.Migrations
             modelBuilder.Entity("Banks.Domain.Entities.BankAccountBalance", b =>
                 {
                     b.HasOne("Banks.Domain.Entities.BankAccount", "BankAccount")
-                        .WithMany()
+                        .WithMany("Balances")
                         .HasForeignKey("BankAccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -273,6 +307,11 @@ namespace Banks.Infrastructure.Migrations
             modelBuilder.Entity("Banks.Domain.Entities.Bank", b =>
                 {
                     b.Navigation("BankAccounts");
+                });
+
+            modelBuilder.Entity("Banks.Domain.Entities.BankAccount", b =>
+                {
+                    b.Navigation("Balances");
                 });
 #pragma warning restore 612, 618
         }

@@ -18,6 +18,7 @@ public static class BanksInfrastructureExtension
     )
     {
         services.AddScoped<IBankRepository, BankRepository>();
+        services.AddScoped<IBankAccountTransferRepository, BankAccountTransferRepository>();
         services.AddScoped<IBankOutboxWriter, BankOutboxWriter>();
 
      

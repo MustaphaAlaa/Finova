@@ -14,4 +14,5 @@ public class BankAccount
 
     [ForeignKey("Currency")] public required Guid CurrencyId { get; set; }
     public Currency Currency { get; set; }
+    public ICollection<BankAccountBalance> Balances { get; set; } = new List<BankAccountBalance>();
 }
